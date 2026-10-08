@@ -1,0 +1,11 @@
+.git
+.vercel
+node_modules
+CONFIG/local.php
+CONFIG/local.exemplo.php
+.env*
+tests
+database
+supabase
+*.md
+*.log

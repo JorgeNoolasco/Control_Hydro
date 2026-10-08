@@ -18,7 +18,7 @@ function numero(mixed $valor): string
 
 function dataHora(string $valor): string
 {
-    return (new DateTimeImmutable($valor))->format('d/m/Y H:i:s');
+    return (new DateTimeImmutable($valor))->setTimezone(new DateTimeZone('America/Sao_Paulo'))->format('d/m/Y H:i:s');
 }
 
 function classeStatus(string $status): string
@@ -45,5 +45,5 @@ function lerNumero(array $entrada, string $campo): float
 
 function erroBanco(): string
 {
-    return 'Não foi possível acessar o banco de dados. Verifique a conexão e a configuração do MySQL.';
+    return 'Não foi possível acessar o banco de dados. Tente novamente em instantes.';
 }

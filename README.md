@@ -1,6 +1,6 @@
 # HidroControl
 
-Sistema educacional simples para registrar manualmente leituras de uma usina e acompanhar alertas. PHP 8+, MySQL 8.0.16+, PDO, HTML, CSS e JavaScript puro. Sem frameworks.
+Sistema educacional simples para registrar manualmente leituras de uma usina e acompanhar alertas. PHP 8+, PDO, HTML, CSS e JavaScript puro. Na Vercel usa PostgreSQL do Supabase; também mantém suporte a MySQL 8.0.16+ local. Sem frameworks.
 
 ## Executar no Laragon
 
@@ -19,7 +19,9 @@ O PHP precisa da extensão pdo_mysql e mbstring (disponíveis no Laragon). As da
 - `cadastrar.php`: formulário, validação e gravação via POST.
 - `historico.php`: filtros por situação/data e paginação de 15 registros.
 - `CLASSES/usina.php`: classe com atributos privados e regras de negócio.
-- `CONFIG/conexao.php`: conexão PDO.
+- `CONFIG/conexao.php`: conexão PDO MySQL/PostgreSQL por variáveis de ambiente.
+- `CLASSES/SessaoBanco.php`: sessões compartilhadas no banco.
+- `supabase/migrations/`: estrutura PostgreSQL, índices e proteção da API pública.
 - `includes/`: funções compartilhadas, cabeçalho e rodapé.
 - `assets/css/style.css` e `assets/js/script.js`: visual responsivo e gráficos SVG.
 - `database/hidrocontrol.sql`: estrutura MySQL e sensores conceituais.
@@ -63,6 +65,7 @@ Teste manual: cadastre uma leitura, confira o painel e o histórico; filtre por 
 ## Publicar na Vercel
 
 Siga o passo a passo em [DEPLOY_VERCEL.md](DEPLOY_VERCEL.md).
-O projeto inclui o runtime PHP, as rotas públicas, configuração por variáveis de ambiente e sessões MySQL.
-É necessário um MySQL hospedado; o banco local do Laragon não acompanha o deploy.
-Para criar as tabelas no banco do provedor, use database/schema.sql.
+O projeto inclui runtime PHP, rotas públicas, conexão PostgreSQL com TLS e sessões persistidas no Supabase.
+Conecte o banco Supabase ao projeto Vercel e configure `POSTGRES_URL` ou `DATABASE_URL` com a URI do pooler.
+As migrações PostgreSQL ficam em `supabase/migrations/`; `database/schema.sql` continua sendo apenas para MySQL.
+Execute `php tests/deploy.php` para validar rotas/configuração e `php tests/banco.php` para verificar uma conexão PostgreSQL configurada.

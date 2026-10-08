@@ -10,6 +10,7 @@ $atual = max(1, (int) filter_var($_GET['pagina'] ?? 1, FILTER_VALIDATE_INT));
 $status = is_string($_GET['status'] ?? null) ? $_GET['status'] : '';
 $data = is_string($_GET['data'] ?? null) ? $_GET['data'] : '';
 try {
+    $pdo = conectar();
     $condicoes = [];
     $parametros = [];
     if ($status !== '') {
@@ -24,11 +25,11 @@ try {
         }
         // Intervalo permite aproveitar o índice de data.
         $condicoes[] = 'data_registro >= :inicio AND data_registro < :fim';
-        $parametros['inicio'] = $dia->format('Y-m-d');
-        $parametros['fim'] = $dia->modify('+1 day')->format('Y-m-d');
+        $formato = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql' ? 'Y-m-d H:i:sP' : 'Y-m-d';
+        $parametros['inicio'] = $dia->format($formato);
+        $parametros['fim'] = $dia->modify('+1 day')->format($formato);
     }
     $where = $condicoes ? ' WHERE ' . implode(' AND ', $condicoes) : '';
-    $pdo = conectar();
     $contagem = $pdo->prepare('SELECT COUNT(*) FROM leituras' . $where);
     $contagem->execute($parametros);
     $total = (int) $contagem->fetchColumn();

@@ -2,9 +2,14 @@
 declare(strict_types=1);
 
 // Compartilha o token CSRF e a mensagem de sucesso entre instâncias da Vercel.
-class SessaoMySQL implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
+class SessaoBanco implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface
 {
-    public function __construct(private PDO $pdo) {}
+    private bool $postgres;
+
+    public function __construct(private PDO $pdo)
+    {
+        $this->postgres = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql';
+    }
 
     public function open(string $path, string $name): bool { return true; }
 
@@ -18,18 +23,23 @@ class SessaoMySQL implements SessionHandlerInterface, SessionUpdateTimestampHand
     {
         // A transação serializa pedidos da mesma sessão, evitando reenvios simultâneos.
         $this->pdo->beginTransaction();
-        $q = $this->pdo->prepare("INSERT INTO sessoes (id, dados, expira_em) VALUES (?, '', 0) ON DUPLICATE KEY UPDATE id = id");
-        $q->execute([$id]);
+        $upsert = $this->postgres ? 'ON CONFLICT (id) DO NOTHING' : 'ON DUPLICATE KEY UPDATE id = id';
+        $q = $this->pdo->prepare("INSERT INTO sessoes (id, dados, expira_em) VALUES (?, '', ?) $upsert");
+        $q->execute([$id, time() + 7200]);
         $q = $this->pdo->prepare('SELECT dados, expira_em FROM sessoes WHERE id = ? FOR UPDATE');
         $q->execute([$id]);
         $sessao = $q->fetch();
-        return $sessao && (int) $sessao['expira_em'] > time() ? $sessao['dados'] : '';
+        if (!$sessao || (int) $sessao['expira_em'] <= time()) return '';
+        return $this->postgres ? (base64_decode($sessao['dados'], true) ?: '') : $sessao['dados'];
     }
 
     public function write(string $id, string $data): bool
     {
-        $q = $this->pdo->prepare('UPDATE sessoes SET dados = ?, expira_em = ? WHERE id = ?');
-        $q->execute([$data, time() + 7200, $id]);
+        $upsert = $this->postgres
+            ? 'ON CONFLICT (id) DO UPDATE SET dados = EXCLUDED.dados, expira_em = EXCLUDED.expira_em'
+            : 'ON DUPLICATE KEY UPDATE dados = VALUES(dados), expira_em = VALUES(expira_em)';
+        $q = $this->pdo->prepare("INSERT INTO sessoes (id, dados, expira_em) VALUES (?, ?, ?) $upsert");
+        $q->execute([$id, $this->postgres ? base64_encode($data) : $data, time() + 7200]);
         if ($this->pdo->inTransaction()) $this->pdo->commit();
         return true;
     }

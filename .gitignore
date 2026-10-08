@@ -1,0 +1,9 @@
+/.vercel/
+/node_modules/
+/CONFIG/local.php
+.env
+.env.*
+!.env.example
+*.log
+/supabase/.temp/
+/supabase/.branches/

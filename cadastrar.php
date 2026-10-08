@@ -27,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $consulta->execute($dados);
         $_SESSION['sucesso'] = 'Leitura registrada com sucesso!';
         $_SESSION['csrf'] = bin2hex(random_bytes(32));
+        // Confirma também a transação antes de redirecionar para outra instância.
+        session_write_close();
         header('Location: index.php', true, 303);
         exit;
     } catch (InvalidArgumentException $ex) {

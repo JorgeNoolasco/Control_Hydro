@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 try {
     if (naVercel() || ambiente('SESSION_DRIVER') === 'database') {
-        require_once __DIR__ . '/../CLASSES/SessaoMySQL.php';
-        session_set_save_handler(new SessaoMySQL(conectar()), true);
+        require_once __DIR__ . '/../CLASSES/SessaoBanco.php';
+        session_set_save_handler(new SessaoBanco(conectar()), true);
     }
     session_name('hidrocontrol');
     session_start([
@@ -20,7 +20,7 @@ try {
     header('Cache-Control: private, no-store');
 } catch (PDOException $ex) {
     // Não revelar detalhes da conexão nem seguir com um formulário sem sessão.
-    error_log('HidroControl: falha ao iniciar a sessão MySQL. Código ' . $ex->getCode());
+    error_log('HidroControl: falha ao iniciar a sessão no banco. Código ' . $ex->getCode());
     http_response_code(503);
     header('Content-Type: text/html; charset=UTF-8');
     header('Cache-Control: no-store');

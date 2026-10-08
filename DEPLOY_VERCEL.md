@@ -1,91 +1,88 @@
-# Publicar o HidroControl na Vercel
+# HidroControl na Vercel com Supabase PostgreSQL
 
-O projeto continua em PHP + MySQL. O arquivo `vercel.json` usa o runtime comunitário [vercel-php 0.9.0](https://github.com/vercel-community/php), com PHP 8.5 e Node.js 22. A Vercel [documenta runtimes comunitários](https://vercel.com/docs/functions/runtimes); este não é um runtime PHP oficial.
+O aplicativo usa PHP/PDO no servidor, PostgreSQL do Supabase para leituras e sessões e o runtime comunitário [vercel-php 0.9.0](https://github.com/vercel-community/php) (PHP 8.5, Node 22). Não precisa de Composer nem de framework JavaScript.
 
-## 1. Preparar um MySQL hospedado
+## Projetos
 
-O MySQL do Laragon em localhost não é acessível pela Vercel. Você precisa de um banco MySQL 8.0.16 ou superior, com endereço acessível pela internet e conexão TLS.
+- Vercel: `control_hydro`, repositório `JorgeNoolasco/Control_Hydro`.
+- Supabase: `Hidro-Control` (`ythabdyplpkduqaezkxe`, região `us-east-1`).
+- As funções usam `iad1`, próxima ao banco.
 
-No painel ou cliente SQL do seu provedor:
+## Publicação verificada em 08/10/2026
 
-1. Selecione o banco que o provedor criou para você.
-2. Execute **database/schema.sql**. Ele cria as tabelas sensores, leituras e sessoes, sem tentar criar ou trocar o banco.
-3. Se as tabelas sensores e leituras já existem, basta executar **database/sessoes.sql**.
-4. Guarde host, porta, nome do banco, usuário e senha para cadastrar diretamente na Vercel.
+- Produção: https://controlhydro.vercel.app
+- Deployment: `dpl_CeGx5pumMwKUypRvZmgofS9d6CNF` (READY).
+- Integração Supabase conectada; `POSTGRES_URL` disponível em Production e Preview.
+- Validado pelo domínio de produção: cadastro, gravação no Supabase, painel, filtros de status/data, sessão, CSRF, proteção contra envio simultâneo duplicado e rotas privadas retornando 404.
+- A leitura de teste foi removida. As migrações locais correspondem ao histórico remoto.
+- A publicação foi feita a partir dos arquivos locais pela API da Vercel. As alterações no repositório ainda precisam de commit/push para que os próximos deploys pelo GitHub usem esta versão.
 
-Importar a estrutura não copia as leituras do Laragon. Se quiser preservar essas leituras, exporte os dados da tabela leituras e importe no banco hospedado.
+## Banco
 
-O usuário utilizado pelo aplicativo precisa de SELECT, INSERT, UPDATE e DELETE nas tabelas do projeto. Importe a estrutura com um usuário autorizado a criar tabelas.
+As migrações em `supabase/migrations/` criam `sensores`, `leituras` e `sessoes`. No projeto acima a estrutura já foi aplicada. Não execute novamente o SQL inicial no mesmo banco.
 
-## 2. Importar o projeto
+Em um Supabase novo, aplique as migrações em ordem pelo SQL Editor, ou use a CLI Supabase para vincular o projeto e executar `supabase db push`. **Os arquivos em `database/` são exclusivos de MySQL local**, não de PostgreSQL. Nenhuma leitura local é transferida automaticamente.
 
-1. Envie esta pasta para um repositório no GitHub.
-2. Na Vercel, use **Add New → Project** e importe o repositório.
-3. Selecione **Framework Preset: Other** e a pasta raiz do projeto.
-4. Use **Node.js 22.x**. O package.json já declara essa versão para o runtime.
-5. Mantenha **Build Command sem comando** e **Output Directory no padrão**, sem definir public, dist ou build.
-6. Cadastre as variáveis abaixo antes de clicar em Deploy.
+As tabelas têm RLS e acesso revogado para `anon`/`authenticated`. O PHP usa a conexão PostgreSQL do servidor; não há acesso do navegador à API de dados, e nenhuma senha é enviada ao JavaScript. Por isso não existem políticas públicas nas tabelas. Os quatro sensores são conceituais, e cada leitura contém os dados da usina inteira.
 
-Não precisa instalar Laravel, Composer ou dependências JavaScript. O package.json apenas informa a versão do Node usada pelo runtime PHP.
+## Conectar Supabase e Vercel
 
-## 3. Variáveis de ambiente
+1. Na [área Storage do projeto](https://vercel.com/blue-math/control_hydro/stores), conecte o banco existente **Hidro-Control** a **control_hydro**.
+2. Confira em Settings → Environment Variables se a integração criou `POSTGRES_URL` para Production.
+3. A conexão deve ser a URI do **Transaction pooler**, porta **6543**, disponível no botão **Connect** do Supabase. Copie host e usuário do painel, sem tentar deduzir o endereço pela região.
+4. Se a integração não fornecer uma URI adequada, cadastre `DATABASE_URL` diretamente na Vercel com a URI do pooler. Ela tem prioridade sobre `POSTGRES_URL`. Caracteres especiais na senha devem estar codificados como URL.
+5. Gere um novo deploy após conectar o banco ou alterar variáveis.
 
-Em **Settings → Environment Variables**, configure:
+Não use `SUPABASE_URL`, chave `anon`, publishable ou service role como conexão PostgreSQL. A aplicação precisa da URI de banco com usuário e senha. Não coloque credenciais em arquivos versionados.
 
-| Nome | Valor |
+| Variável | Uso |
 | --- | --- |
-| DB_HOST | Host externo fornecido pelo banco, sem http:// |
-| DB_PORT | Porta fornecida pelo banco, geralmente 3306 |
-| DB_NAME | Nome exato do banco hospedado |
-| DB_USER | Usuário do banco |
-| DB_PASSWORD | Senha do banco, cadastrada como segredo |
-| DB_SSL | true |
-| DB_SSL_CA | Opcional: caminho para o certificado CA público do provedor |
+| `DATABASE_URL` ou `POSTGRES_URL` | URI PostgreSQL do pooler, obrigatória na nuvem |
+| `DB_SSLMODE` | Padrão `require`; TLS obrigatório na Vercel |
+| `SESSION_DRIVER` | `database` para testar sessões compartilhadas localmente; automático na Vercel |
 
-Se o banco exigir sua própria CA, salve o certificado público em **CONFIG/certs/ca.pem** e configure **DB_SSL_CA=/var/task/user/CONFIG/certs/ca.pem**. Nunca inclua chaves privadas. Sem essa variável, o código procura os certificados do sistema. A conexão valida o certificado e exige TLS quando DB_SSL=true.
+Como alternativa à URI, configure `DB_DRIVER=pgsql`, `DB_HOST`, `DB_PORT=6543`, `DB_NAME=postgres`, `DB_USER` e `DB_PASSWORD`.
 
-Configure as variáveis para **Production**. Para testar em **Preview**, use preferencialmente outro banco. Depois de alterar variáveis, faça um novo deploy.
+`sslmode=require` exige criptografia. Para verificar também a identidade do servidor, use `DB_SSLMODE=verify-full` e configure `PGSSLROOTCERT` com o caminho do certificado CA público disponibilizado pelo Supabase. As opções são descritas na [documentação de conexão do Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres). Prepared statements persistentes estão desativados para compatibilidade com o pooler.
 
-O arquivo .env.example serve como referência; PHP puro não lê arquivos .env automaticamente. Credenciais locais em CONFIG/local.php e arquivos .env são excluídos do upload.
+Use um banco separado em Preview/Development se precisar de ambientes isolados. Sem variáveis de banco, o site responde 503 com uma mensagem genérica.
 
-## 4. Conferir o site
+## Configuração da Vercel
 
-Depois do deploy:
+`vercel.json` declara Framework Other, nenhum comando de build/instalação e Node 22 em `package.json`. Deixe Output Directory no padrão. Somente `/`, `/index.php`, `/cadastrar.php`, `/historico.php` e os dois arquivos de assets são públicos.
 
-- Abra a página inicial.
-- Cadastre uma leitura e confira a mensagem de sucesso.
-- Abra o histórico e aplique filtros.
-- Atualize a página: a leitura não deve duplicar.
-- Endereços como /CONFIG/conexao.php, /database/schema.sql e /tests/usina.php devem retornar 404.
+`.vercelignore` exclui credenciais locais, testes, SQL e documentação do upload via CLI. `.gitignore` protege `CONFIG/local.php`, arquivos `.env` e `.vercel/`. O PHP puro não carrega `.env` automaticamente.
 
-As sessões ficam no MySQL para o formulário funcionar entre diferentes instâncias da Vercel. O código não depende de arquivos temporários para guardar leituras ou sessões.
-
-O sistema continua sendo uma demonstração sem login: pessoas com acesso ao site podem cadastrar leituras.
-
-## Testar antes do deploy
-
-No terminal do Laragon:
+## Validação
 
 ```text
 php tests/usina.php
 php tests/deploy.php
-php -S localhost:8000 api/index.php
 ```
 
-Para simular as sessões compartilhadas localmente, importe database/sessoes.sql e, no PowerShell, inicie o servidor assim:
+Para testar a conexão real localmente, copie `CONFIG/local.exemplo.php` para `CONFIG/local.php`, preencha `url` e habilite `pdo_pgsql` e `mbstring`. Então execute:
+
+```text
+php tests/banco.php
+```
+
+Esse teste verifica gravação e consulta dentro de uma transação revertida, booleanos, filtro por data de Brasília e persistência de sessão com dados binários. A sessão de teste é removida ao final.
+
+Para testar o formulário em PowerShell:
 
 ```powershell
 $env:SESSION_DRIVER = 'database'
 php -S localhost:8000 api/index.php
 ```
 
-Abra http://localhost:8000. O runtime comunitário recomenda o servidor PHP para testes locais; vercel dev não é suportado por ele.
+Abra http://localhost:8000, cadastre uma leitura, confira a mensagem de sucesso, o painel e o histórico. Atualizar após salvar não deve duplicar a leitura. O token CSRF muda depois de cada cadastro. As datas são armazenadas com fuso e exibidas/filtradas em Brasília.
 
-## Se algo falhar
+Endereços como `/CONFIG/conexao.php`, `/database/schema.sql`, `/supabase/migrations/` e `/tests/banco.php` devem retornar 404. O sistema é uma demonstração sem login: pessoas com acesso ao site podem cadastrar leituras.
 
-- **503 / banco indisponível:** confira variáveis, acesso de rede e a tabela sessoes.
-- **Falha TLS:** configure a CA fornecida pelo provedor e confira se o host corresponde ao certificado.
-- **Página PHP não executa:** confira Framework Other, Node 22.x e o vercel.json.
-- **Mudanças nas variáveis não aparecem:** gere um novo deploy.
+## Diagnóstico
 
-Esta preparação não publica o site nem cria um serviço de banco externo. A validação real na nuvem depende do seu banco e do primeiro deploy.
+- **503:** confira a URI, a senha, a conexão do banco ao projeto e a existência de `sessoes`.
+- **Tenant or user not found:** copie exatamente host e usuário do pooler no Supabase.
+- **Erro de prepared statement:** use este código atualizado; ele desativa statements persistentes no PDO PostgreSQL.
+- **Build PHP falhou:** confira Node 22 e runtime `vercel-php@0.9.0`.
+- **Variáveis não aparecem:** faça novo deploy. As variáveis são capturadas na criação do deployment.
