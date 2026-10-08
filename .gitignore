@@ -1,9 +1,13 @@
+# Metadados locais de deploy e dependências instaladas não pertencem ao código-fonte.
 /.vercel/
 /node_modules/
+# Credenciais e arquivos de ambiente ficam fora do repositório.
 /CONFIG/local.php
 .env
 .env.*
+# Mantém somente o modelo sem segredos disponível para versionamento.
 !.env.example
+# Logs e estado temporário da CLI Supabase são gerados durante o uso.
 *.log
 /supabase/.temp/
 /supabase/.branches/

@@ -1,7 +1,9 @@
 <?php
+// Testes unitários das regras de domínio; não abrem conexão nem gravam leituras.
 declare(strict_types=1);
 require_once __DIR__ . '/../CLASSES/usina.php';
 
+// Cada caso contém: nome, nível, temperatura, estado da turbina, situação e total de alertas.
 $casos = [
     ['A', 70, 65, true, 'Normal', 0],
     ['B', 25, 78, true, 'Atenção', 2],
@@ -16,20 +18,24 @@ $casos = [
     ['Temperatura 85,01', 70, 85.01, true, 'Crítico', 1],
     ['Turbina desligada', 70, 65, false, 'Atenção', 1],
 ];
+// A desestruturação dá nomes aos valores de cada cenário e torna a comparação explícita.
 foreach ($casos as [$nome, $nivel, $temperatura, $turbina, $esperado, $alertas]) {
     $usina = new Usina('Teste', $nivel, $temperatura, 420, 65, $turbina);
+    // Tanto a prioridade do status quanto o número de mensagens precisam coincidir.
     if ($usina->verificarSituacaoGeral() !== $esperado || count($usina->gerarAlertas()) !== $alertas) {
         fwrite(STDERR, "Falha: $nome\n");
         exit(1);
     }
     echo "OK: $nome\n";
 }
+// Exercita limites, sinais inválidos, NaN, infinito e excesso de casas decimais.
 foreach ([[-1,65,1,1], [101,65,1,1], [70,65,-1,1], [70,65,1,-1], [70,1000,1,1], [NAN,65,1,1], [70,65,INF,1], [70.001,65,1,1]] as $valores) {
     try {
         new Usina('Teste', $valores[0], $valores[1], $valores[2], $valores[3], true);
         fwrite(STDERR, "Falha: entrada inválida aceita.\n");
         exit(1);
     } catch (InvalidArgumentException $ex) {
+        // Nestes casos, lançar a exceção é o comportamento esperado do construtor.
         echo "OK: entrada inválida rejeitada\n";
     }
 }

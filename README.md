@@ -29,6 +29,33 @@ O PHP precisa da extensão pdo_mysql e mbstring (disponíveis no Laragon). As da
 
 As pastas CLASSES e CONFIG mantêm os nomes usados nos includes, inclusive em servidores Linux.
 
+## Como ler o código comentado
+
+Comece por `api/index.php`, que seleciona a página permitida. As páginas carregam `includes/funcoes.php`, responsável pelos utilitários e pela inicialização de conexão e sessão. `cadastrar.php` valida os dados com `CLASSES/usina.php`, grava a leitura e redireciona ao painel. `index.php` apresenta os indicadores e entrega o JSON dos gráficos para `assets/js/script.js`; `historico.php` consulta os registros com filtros e paginação. `assets/css/style.css` organiza o visual e a adaptação às telas menores.
+
+Os arquivos PHP, HTML, JavaScript, CSS, SQL, INI, modelos de ambiente e regras de exclusão têm comentários em português. Os comentários nos testes explicam o que cada cenário verifica. Comentários nas migrações servem para leitura do código; não exigem executar novamente migrações já aplicadas.
+
+### Configuração JSON
+
+JSON não admite comentários. As opções dos dois arquivos são explicadas aqui para preservar o formato aceito pelas ferramentas.
+
+| Arquivo / opção | Significado |
+| --- | --- |
+| `package.json` → `name` | Identifica o projeto como `hidrocontrol`. |
+| `package.json` → `private` | Impede publicação acidental como pacote npm. |
+| `package.json` → `engines.node` | Seleciona Node 22 para o runtime usado no deploy. |
+| `vercel.json` → `$schema` | Referência para validação e sugestões do editor. |
+| `vercel.json` → `version` | Versão do formato de configuração da Vercel. |
+| `vercel.json` → `framework` | `null` corresponde ao projeto sem framework detectado. |
+| `vercel.json` → `buildCommand` | Vazio: não executa um comando de build personalizado. |
+| `vercel.json` → `installCommand` | Vazio: o aplicativo não precisa instalar dependências npm. |
+| `vercel.json` → `regions` | `iad1` define a região das funções, próxima ao banco configurado. |
+| `vercel.json` → `functions` | Declara a função PHP cuja entrada é `api/index.php`. |
+| `vercel.json` → `runtime` | Fixa o runtime comunitário `vercel-php@0.9.0`. |
+| `vercel.json` → `routes` | Regras de roteamento avaliadas na ordem declarada. |
+| `routes` → `src` | Expressão que identifica o caminho solicitado. A primeira permite os dois assets; a segunda captura os demais caminhos. |
+| `routes` → `dest` | Destino interno: `$1` reutiliza o grupo capturado do asset; os demais pedidos passam pelo roteador PHP. |
+
 ## Regras simuladas
 
 - Reservatório abaixo de 30% ou acima de 90%: atenção. De 30% a 90%, inclusive: normal.

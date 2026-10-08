@@ -1,9 +1,12 @@
+# Exclui metadados e dependências locais do upload feito pela CLI da Vercel.
 .git
 .vercel
 node_modules
+# A nuvem recebe credenciais por variáveis de ambiente, nunca por arquivos locais.
 CONFIG/local.php
 CONFIG/local.exemplo.php
 .env*
+# Materiais de desenvolvimento e migração não são necessários para executar o site.
 tests
 database
 supabase

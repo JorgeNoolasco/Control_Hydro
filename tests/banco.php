@@ -1,29 +1,37 @@
 <?php
+// Teste de integração: exige uma conexão PostgreSQL configurada e tabelas já criadas.
 declare(strict_types=1);
+// A execução é exclusiva do terminal, pois o teste realiza escritas temporárias no banco.
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require_once __DIR__ . '/../CONFIG/conexao.php';
 require_once __DIR__ . '/../CLASSES/SessaoBanco.php';
 
 $pdo = conectar();
 if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') throw new RuntimeException('Este teste requer PostgreSQL.');
+// A leitura é criada dentro de uma transação que será sempre desfeita ao final.
 $pdo->beginTransaction();
 try {
     // Identificador negativo evita consumir a sequência de leituras reais.
     $id = -random_int(1, 2147483647);
     $q = $pdo->prepare('INSERT INTO leituras (id, nivel_reservatorio, temperatura, vazao, potencia, turbina_ligada, status_geral, data_registro)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING turbina_ligada');
+    // O instante em UTC pertence ao dia anterior em Brasília; a turbina está desligada.
     $q->execute([$id, '70.00', '65.00', '420.00', '65.00', '0', 'Atenção', '2026-10-08 01:30:00+00']);
     if ($q->fetchColumn() !== false) throw new RuntimeException('Booleano falso não foi preservado.');
+    // Confere o intervalo de um dia inteiro no fuso usado pelo filtro do histórico.
     $q = $pdo->prepare('SELECT count(*) FROM leituras WHERE id = ? AND data_registro >= ? AND data_registro < ?');
     $q->execute([$id, '2026-10-07 00:00:00-03:00', '2026-10-08 00:00:00-03:00']);
     if ((int) $q->fetchColumn() !== 1) throw new RuntimeException('Filtro de data de Brasília falhou.');
     echo "OK: gravação, booleano e filtro de data em Brasília\n";
 } finally {
+    // Não deixa a leitura de teste no histórico, mesmo quando alguma asserção falha.
     $pdo->rollBack();
 }
 
+// O manipulador confirma suas próprias transações; por isso a sessão exige limpeza separada.
 $sessao = new SessaoBanco($pdo);
 $id = 'teste-' . bin2hex(random_bytes(16));
+// A serialização inclui um byte nulo para conferir a preservação de dados binários.
 $dados = "csrf|s:4:\"abcd\";binario|s:3:\"a\0b\";";
 try {
     if ($sessao->read($id) !== '') throw new RuntimeException('Sessão nova não está vazia.');
@@ -33,6 +41,7 @@ try {
     echo "OK: sessão persistida e recuperada com dados binários\n";
 } finally {
     $sessao->close();
+    // Exclui somente a sessão com identificador aleatório criado por este teste.
     $sessao->destroy($id);
 }
 echo "Integração PostgreSQL validada; dados de teste removidos.\n";
