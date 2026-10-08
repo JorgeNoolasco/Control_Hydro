@@ -1,0 +1,33 @@
+[Thu Oct  8 11:47:10 2026] PHP 8.3.33 Development Server (http://127.0.0.1:8097) started
+[Thu Oct  8 11:48:49 2026] 127.0.0.1:50806 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50806 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50814 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50814 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50820 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50820 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50825 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50825 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50826 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50826 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50827 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50827 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50828 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50828 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50829 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50829 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50830 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50830 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50831 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50831 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50832 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50832 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50833 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50833 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50834 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50834 [200]: GET /assets/css/style.css
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50834 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50835 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50835 [200]: GET /assets/js/script.js
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50835 Closing
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50836 Accepted
+[Thu Oct  8 11:48:50 2026] 127.0.0.1:50836 Closing
