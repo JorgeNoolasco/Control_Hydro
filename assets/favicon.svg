@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Versão reduzida do símbolo, com traços legíveis na aba do navegador. -->
+  <rect width="32" height="32" rx="6" fill="#203d49"/>
+  <path d="M8 9h16M11 9l-2 11m12-11 2 11M16 9v7" fill="none" stroke="#e5ecef" stroke-width="2" stroke-linecap="round"/>
+  <path d="M6 22c3-2 5 2 8 0s5 2 12 0M6 27c3-2 5 2 8 0s5 2 12 0" fill="none" stroke="#8fb8c8" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

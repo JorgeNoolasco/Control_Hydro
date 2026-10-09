@@ -6,13 +6,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HidroControl — <?= e($titulo) ?></title>
+    <!-- SVGs embutidos usam os arquivos locais sem acrescentar rotas públicas de assets. -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,<?= base64_encode(file_get_contents(__DIR__ . '/../assets/favicon.svg')) ?>">
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- defer executa o JavaScript depois que os elementos da página já foram interpretados. -->
     <script src="assets/js/script.js" defer></script>
 </head>
 <body>
 <header>
-    <a class="logo" href="index.php"><span aria-hidden="true">≈</span> HidroControl</a>
+    <a class="logo" href="index.php" aria-label="HidroControl — página inicial"><?php readfile(__DIR__ . '/../assets/logo.svg'); ?></a>
     <nav aria-label="Navegação principal">
         <!-- aria-current identifica o link ativo visualmente e para leitores de tela. -->
         <?php foreach (['index.php' => 'Painel', 'cadastrar.php' => 'Nova leitura', 'historico.php' => 'Histórico'] as $arquivo => $rotulo): ?>

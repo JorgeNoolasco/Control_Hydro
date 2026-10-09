@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 226 44" width="226" height="44" role="img" aria-label="HidroControl">
+  <!-- Duas estruturas da barragem e linhas de água compõem o símbolo. -->
+  <rect width="44" height="44" rx="8" fill="#203d49"/>
+  <path d="M11 12h22M15 12l-3 16m17-16 3 16M22 12v10" fill="none" stroke="#e5ecef" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M9 29c4-3 7 3 11 0s7 3 15 0M9 35c4-3 7 3 11 0s7 3 15 0" fill="none" stroke="#8fb8c8" stroke-width="2" stroke-linecap="round"/>
+  <text x="56" y="29" fill="#e5ecef" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" letter-spacing="-.5">Hidro<tspan fill="#9bbbc8">Control</tspan></text>
+</svg>
