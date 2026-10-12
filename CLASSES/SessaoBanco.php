@@ -45,7 +45,7 @@ class SessaoBanco implements SessionHandlerInterface, SessionUpdateTimestampHand
         return $this->postgres ? (base64_decode($sessao['dados'], true) ?: '') : $sessao['dados'];
     }
 
-    /** Insere/atualiza a sessão, renova a validade por duas horas e confirma a transação. */
+    /** Insere/atualiza a sessão, renova sua validade configurada e confirma a transação. */
     public function write(string $id, string $data): bool
     {
         $upsert = $this->postgres

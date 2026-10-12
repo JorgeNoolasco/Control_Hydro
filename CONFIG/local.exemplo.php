@@ -5,13 +5,15 @@ return [
     // Para Supabase, preencha 'url' com a URI PostgreSQL do pooler.
     // 'url' => 'postgresql://USUARIO:SENHA@HOST:6543/postgres',
     // 'sslmode' => 'require',
-    // Padrões para MySQL local; este modelo não contém credenciais de produção.
-    'driver' => 'mysql',
+    // PostgreSQL local: a autenticação nova requer esse driver.
+    'driver' => 'pgsql',
     // Endereço e porta onde o serviço de banco local está escutando.
     'host' => 'localhost',
-    'porta' => 3306,
-    // Banco criado por database/hidrocontrol.sql e credenciais do usuário local.
+    'porta' => 5432,
+    // Banco local migrado por supabase/migrations/ e credencial restrita do backend.
     'banco' => 'hidrocontrol',
-    'usuario' => 'root',
+    'usuario' => 'hidrocontrol_app',
     'senha' => '',
+    // Use require/verify-full para Supabase; disable apenas no PostgreSQL local.
+    'sslmode' => 'disable',
 ];

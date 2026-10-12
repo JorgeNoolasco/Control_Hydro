@@ -19,6 +19,6 @@ function enviarRecuperacao(string $email, string $token): void
     ]);
     $resposta = curl_exec($curl);
     $status = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    curl_close($curl);
+    unset($curl);
     if ($resposta === false || $status < 200 || $status >= 300) throw new RuntimeException('Falha no envio.');
 }

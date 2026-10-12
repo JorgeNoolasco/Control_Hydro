@@ -27,7 +27,7 @@ final class Autenticacao
         'confirmacao_falha'
     ];
     // Hash de uma senha aleatória descartada: equaliza o custo para contas inexistentes.
-    private const HASH_INEXISTENTE = '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.';
+    private const HASH_INEXISTENTE = '$2y$12$tLUTIof1sOZR/N2In6yJKOyntXl5ihYQRfrDkHkjJja19pnD1VLH.';
 
     public function __construct(private PDO $pdo)
     {

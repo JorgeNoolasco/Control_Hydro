@@ -55,7 +55,7 @@ function http(string $base, string $path, array &$cookies, ?array $post = null, 
     if ($post !== null) { curl_setopt($c, CURLOPT_POST, true); curl_setopt($c, CURLOPT_POSTFIELDS, http_build_query($post)); }
     if ($headers) curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
     if ($method) curl_setopt($c, CURLOPT_CUSTOMREQUEST, $method);
-    $body = curl_exec($c); $code = (int) curl_getinfo($c, CURLINFO_HTTP_CODE); curl_close($c);
+    $body = curl_exec($c); $code = (int) curl_getinfo($c, CURLINFO_HTTP_CODE); unset($c);
     if ($body === false) throw new RuntimeException('Falha de HTTP local.');
     return ['status' => $code, 'body' => $body, 'headers' => $respHeaders];
 }
@@ -65,6 +65,23 @@ function tokenForm(array $r): string {
 }
 function entrar(string $base, string $email, string $senha, array &$cookies): array {
     return http($base, '/login.php', $cookies, ['email' => $email, 'senha' => $senha, 'csrf' => tokenForm(http($base, '/login.php', $cookies))]);
+}
+function concorrentes(array $env, array $entradas): array {
+    $jobs = [];
+    foreach ($entradas as $entrada) {
+        $p = proc_open([PHP_BINARY, '-d', 'extension=pdo_pgsql', __DIR__ . '/concorrencia.php'],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, dirname(__DIR__), $env);
+        if (!is_resource($p)) throw new RuntimeException('Falha ao iniciar worker.');
+        fwrite($pipes[0], json_encode($entrada)); fclose($pipes[0]); $jobs[] = [$p, $pipes];
+    }
+    $resultados = [];
+    foreach ($jobs as [$p, $pipes]) {
+        $saida = stream_get_contents($pipes[1]); $erro = stream_get_contents($pipes[2]);
+        fclose($pipes[1]); fclose($pipes[2]); $code = proc_close($p);
+        if ($code !== 0 || $erro !== '') throw new RuntimeException('Falha no worker de concorrência.');
+        $resultados[] = json_decode($saida, true, 16, JSON_THROW_ON_ERROR);
+    }
+    return $resultados;
 }
 
 try {
@@ -130,6 +147,19 @@ try {
     $env['DB_SSLMODE'] = 'disable'; $env['APP_SECRET'] = $secret; $env['APP_ENV'] = 'development'; $env['SESSION_DRIVER'] = 'database';
     $env['SESSION_IDLE_TIMEOUT'] = '1800'; $env['SESSION_ABSOLUTE_TIMEOUT'] = '28800';
     unset($env['APP_URL']);
+    $envWorker = $env; $envWorker['TEST_DATABASE_URL'] = $env['DATABASE_URL'];
+    for ($i = 0; $i < 4; $i++) $servico->login('concorrente@example.test', 'incorreta', '127.0.0.10');
+    $race = concorrentes($envWorker, [
+        ['acao' => 'login', 'email' => 'concorrente@example.test', 'ip' => '127.0.0.11'],
+        ['acao' => 'login', 'email' => 'concorrente@example.test', 'ip' => '127.0.0.12'],
+    ]);
+    sort($race); ok($race === [false, true], 'limite de login serializa requisições concorrentes');
+    $servico->recuperar('operador@example.test', '127.0.0.1', $capturar);
+    $race = concorrentes($envWorker, [
+        ['acao' => 'redefinir', 'token' => $capturado, 'senha' => $senha],
+        ['acao' => 'redefinir', 'token' => $capturado, 'senha' => $senha],
+    ]);
+    sort($race); ok($race === [false, true], 'somente uma redefinição concorrente consome o token');
     $base = servidor($env); $base2 = servidor($env);
     $anon = [];
     foreach (['/', '/index.php', '/historico.php', '/cadastrar.php', '/usuarios.php', '/auditoria.php', '/perfil.php', '/editar_leitura.php?id=1'] as $path) ok(http($base, $path, $anon)['status'] === 303, 'GET protegido ' . $path);

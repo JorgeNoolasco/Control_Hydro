@@ -24,7 +24,7 @@ function configuracaoBanco(): array
     // A URI explícita tem prioridade sobre a variável gerada pela integração Supabase.
     $url = ambiente('DATABASE_URL');
     if ($url === '') $url = ambiente('POSTGRES_URL', $local['url'] ?? '');
-    $driver = ambiente('DB_DRIVER', $local['driver'] ?? (naVercel() ? 'pgsql' : 'mysql'));
+    $driver = ambiente('DB_DRIVER', $local['driver'] ?? 'pgsql');
     $partes = [];
     if ($url !== '') {
         // Separa protocolo, host, usuário, senha, banco e parâmetros da URI.
@@ -74,7 +74,7 @@ function configuracaoBanco(): array
     $sslmode = ambiente('DB_SSLMODE', $local['sslmode'] ?? ($parametros['sslmode'] ?? 'require'));
     if (
         !is_string($sslmode) || !in_array($sslmode, ['disable', 'require', 'verify-ca', 'verify-full'], true)
-        || ($driver === 'pgsql' && naVercel() && $sslmode === 'disable')
+        || ($driver === 'pgsql' && (naVercel() || ambiente('APP_ENV') === 'production') && $sslmode === 'disable')
     ) {
         throw new PDOException('Modo SSL do banco inválido.');
     }

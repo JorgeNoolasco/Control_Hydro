@@ -10,40 +10,6 @@
     --agua-clara: #dcecef;
     --ocre: #a36125;
 }
-.conta-atual { display: flex; align-items: center; gap: 16px; font-size: 13px; }
-.conta-atual span { max-width: 150px; overflow-wrap: anywhere; }
-.conta-atual small { display: block; color: var(--secundario); }
-.botao-sair { padding: 9px 13px; background: transparent; border: 1px solid var(--borda); border-radius: 6px; color: var(--agua); cursor: pointer; }
-.acesso-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; overflow: hidden; border-radius: 18px; border: 1px solid var(--borda); }
-.acesso-historia { position: relative; padding: 54px 46px; background: var(--agua-clara); overflow: hidden; }
-.acesso-historia h2 { font-size: clamp(28px, 3vw, 40px); line-height: 1.2; max-width: 16ch; margin-top: 26px; }
-.acesso-historia p { max-width: 35ch; color: #45646c; }
-.etiqueta { color: var(--agua); letter-spacing: 2px; font-size: 11px; font-weight: bold; }
-.ondas-acesso { height: 70px; border-top: 3px solid #6cabb2; border-bottom: 3px solid #6cabb2; border-radius: 50%; margin: 55px -90px 40px; transform: rotate(-8deg); }
-.nota-acesso { font-size: 12px; }
-.acesso-formulario { border: 0; border-radius: 0; padding: 48px; }
-.form-seguranca { display: grid; gap: 22px; margin-top: 28px; }
-.form-seguranca .ajuda-campo { margin: -12px 0 0; }
-.acesso-formulario .alerta { margin-top: 24px; }
-.acesso-simples { max-width: 610px; margin: 0 auto; }
-.lista-usuarios { margin-top: 24px; }
-.usuario-item { padding: 20px 0; border-bottom: 1px solid var(--borda); }
-.usuario-item summary, .area-exclusao summary { cursor: pointer; padding: 8px 0; }
-.area-exclusao { margin-top: 30px; border-top: 1px solid var(--borda); padding-top: 20px; }
-.botao-perigo { background: #923b40; border-color: #923b40; }
-@media (max-width: 1100px) {
-    .cabecalho-conteudo { flex-wrap: wrap; }
-    .cabecalho nav { flex-wrap: wrap; }
-}
-@media (max-width: 700px) {
-    .acesso-layout { grid-template-columns: 1fr; }
-    .acesso-historia { padding: 28px; }
-    .acesso-historia h2 { font-size: 28px; max-width: 23ch; margin-top: 12px; }
-    .ondas-acesso, .nota-acesso { display: none; }
-    .acesso-formulario { padding: 28px; }
-    .conta-atual { width: 100%; justify-content: space-between; }
-    .conta-atual span { max-width: 75%; }
-}
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--fundo); color: var(--texto); font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 a { color: var(--agua); text-underline-offset: 4px; }
@@ -307,4 +273,40 @@ tbody tr:last-child td { border-bottom: 0; }
 /* Não há animação automática; a preferência por movimento reduzido é respeitada. */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; }
+}
+
+/* Telas de acesso e administração. */
+.conta-atual { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+.conta-atual span { max-width: 150px; overflow-wrap: anywhere; }
+.conta-atual small { display: block; color: var(--secundario); }
+.botao-sair { padding: 9px 13px; background: transparent; border: 1px solid var(--borda); border-radius: 6px; color: var(--agua); cursor: pointer; }
+.acesso-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; overflow: hidden; border-radius: 18px; border: 1px solid var(--borda); }
+.acesso-historia { position: relative; padding: 54px 46px; background: var(--agua-clara); overflow: hidden; }
+.acesso-historia h2 { font-size: clamp(28px, 3vw, 40px); line-height: 1.2; max-width: 16ch; margin-top: 26px; }
+.acesso-historia p { max-width: 35ch; color: #45646c; }
+.etiqueta { color: var(--agua); letter-spacing: 2px; font-size: 11px; font-weight: bold; }
+.ondas-acesso { height: 70px; border-top: 3px solid #6cabb2; border-bottom: 3px solid #6cabb2; border-radius: 50%; margin: 55px -90px 40px; transform: rotate(-8deg); }
+.nota-acesso { font-size: 12px; }
+.acesso-formulario { border: 0; border-radius: 0; padding: 48px; }
+.form-seguranca { display: grid; gap: 22px; margin-top: 28px; }
+.form-seguranca .ajuda-campo { margin: -12px 0 0; }
+.acesso-formulario .alerta { margin-top: 24px; }
+.acesso-simples { max-width: 610px; margin: 0 auto; }
+.lista-usuarios { margin-top: 24px; }
+.usuario-item { padding: 20px 0; border-bottom: 1px solid var(--borda); }
+.usuario-item summary, .area-exclusao summary { cursor: pointer; padding: 8px 0; }
+.area-exclusao { margin-top: 30px; border-top: 1px solid var(--borda); padding-top: 20px; }
+.botao-perigo { background: #923b40; border-color: #923b40; }
+@media (max-width: 1100px) {
+    .cabecalho-conteudo { flex-wrap: wrap; }
+    .cabecalho nav { flex-wrap: wrap; }
+}
+@media (max-width: 700px) {
+    .acesso-layout { grid-template-columns: 1fr; }
+    .acesso-historia { padding: 28px; }
+    .acesso-historia h2 { font-size: 28px; max-width: 23ch; margin-top: 12px; }
+    .ondas-acesso, .nota-acesso { display: none; }
+    .acesso-formulario { padding: 28px; }
+    .conta-atual { width: 100%; justify-content: space-between; }
+    .conta-atual span { max-width: 75%; }
 }

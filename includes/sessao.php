@@ -22,7 +22,7 @@ try {
         'cookie_samesite' => 'Lax',
         // Exige HTTPS na nuvem, mas permite desenvolvimento local em HTTP.
         'cookie_secure' => producao() || requisicaoHttps(),
-        // Validade de duas horas; a limpeza de sessões é sorteada em 1% das inicializações.
+        // A validade acompanha a inatividade; a limpeza é sorteada em 1% das inicializações.
         'gc_maxlifetime' => tempoInatividade(),
         'gc_probability' => 1,
         'gc_divisor' => 100,

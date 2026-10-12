@@ -2,7 +2,7 @@
 // Entrada única da função PHP na Vercel; encaminha cada URL para uma página permitida.
 declare(strict_types=1);
 
-// Somente estas três páginas podem ser executadas pela função pública.
+// Somente estas páginas podem ser executadas pela função pública.
 // Remove os parâmetros da URL antes de consultar a lista de rotas.
 $caminho = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $paginas = [
@@ -34,7 +34,7 @@ if (!isset($paginas[$caminho])) {
     header('Content-Type: text/html; charset=UTF-8');
     exit('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>HidroControl</title><h1>Página não encontrada</h1><a href="/">Voltar ao painel</a></html>');
 }
-// Somente o cadastro recebe POST; as demais páginas oferecem apenas leitura.
+// Escritas são permitidas somente nos endpoints previstos; as páginas também verificam o método.
 $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $escrita = ['/cadastrar.php', '/login.php', '/recuperar_senha.php', '/redefinir_senha.php', '/perfil.php', '/usuarios.php', '/editar_leitura.php'];
 $permitidos = in_array($caminho, ['/logout.php', '/excluir_leitura.php'], true) ? ['POST']

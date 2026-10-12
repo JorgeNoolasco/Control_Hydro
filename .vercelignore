@@ -8,6 +8,7 @@ CONFIG/local.exemplo.php
 .env*
 # Materiais de desenvolvimento e migração não são necessários para executar o site.
 tests
+scripts
 database
 supabase
 *.md
