@@ -24,7 +24,8 @@ final class Autenticacao
         'recuperacao_bloqueada',
         'email_falha',
         'senha_redefinida',
-        'confirmacao_falha'
+        'confirmacao_falha',
+        'cadastro_bloqueado'
     ];
     // Hash de uma senha aleatória descartada: equaliza o custo para contas inexistentes.
     private const HASH_INEXISTENTE = '$2y$12$tLUTIof1sOZR/N2In6yJKOyntXl5ihYQRfrDkHkjJja19pnD1VLH.';
@@ -170,6 +171,39 @@ final class Autenticacao
         $email = emailValido($email);
         if (!isset(PERFIS[$perfil])) throw new InvalidArgumentException('Perfil inválido.');
         return $this->consulta('INSERT INTO usuarios (nome, email, senha_hash, perfil) VALUES (?, ?, ?, ?) RETURNING id', [$nome, $email, hashSenha($senha), $perfil])->fetchColumn();
+    }
+
+    /** Cadastro público nunca recebe perfil/ativação do cliente nem altera contas existentes. */
+    public function registrar(array $entrada, string $ip): array
+    {
+        if (array_diff(array_keys($entrada), ['nome', 'email', 'senha', 'confirmacao', 'csrf'])) {
+            throw new ErroHttp(403, 'O cadastro não permite alterar permissões.');
+        }
+        $nome = nomeValido(textoEntrada($entrada, 'nome', 120));
+        $email = emailValido(textoEntrada($entrada, 'email', 254));
+        $senha = senhaEntrada($entrada);
+        validarNovaSenha($senha);
+        if ($senha !== senhaEntrada($entrada, 'confirmacao')) throw new InvalidArgumentException('As senhas devem ser iguais.');
+        return transacao($this->pdo, function () use ($nome, $email, $senha, $ip) {
+            [$bloqueado, $conta, $rede] = $this->limitar($email, $ip, 'cadastro', 3);
+            if ($bloqueado) {
+                $this->auditar('cadastro_bloqueado');
+                return ['bloqueado' => true];
+            }
+            // Antes do bootstrap, visitantes não podem ocupar a primeira conta.
+            if (!$this->consulta("SELECT 1 FROM usuarios WHERE perfil = 'administrador' AND ativo LIMIT 1")->fetchColumn()) {
+                throw new ErroHttp(503, 'O cadastro está temporariamente indisponível.');
+            }
+            // Conta todos os pedidos, inclusive duplicados, como na recuperação.
+            $this->tentativa($conta, $rede, 'cadastro', false);
+            $id = $this->consulta(
+                "INSERT INTO usuarios (nome, email, senha_hash, perfil, ativo) VALUES (?, ?, ?, 'visualizador', false) ON CONFLICT (email) DO NOTHING RETURNING id",
+                [$nome, $email, hashSenha($senha)]
+            )->fetchColumn();
+            if ($id) $this->auditar('usuario_criado', null, $id, ['perfil_novo' => 'visualizador', 'ativo' => false]);
+            // Mesma resposta para novo cadastro e e-mail já utilizado.
+            return ['bloqueado' => false];
+        });
     }
 
     public function provisionar(string $nome, string $email, string $senha): string

@@ -100,6 +100,8 @@ try {
     $runtime = pdoTeste($pr); $servico = new Autenticacao($runtime);
     $secret = bin2hex(random_bytes(32)); putenv('APP_SECRET=' . $secret);
     $senha = bin2hex(random_bytes(10)); $novaSenha = bin2hex(random_bytes(10));
+    negado(fn() => $servico->registrar(['nome' => 'Visitante', 'email' => 'primeiro@example.test', 'senha' => $senha, 'confirmacao' => $senha], '127.0.0.55'), 'cadastro público aguarda primeiro administrador');
+    ok((int) $pdo->query('SELECT count(*) FROM usuarios')->fetchColumn() === 0, 'cadastro público não bloqueia bootstrap');
     $adminId = $servico->provisionar('Administrador', 'admin@example.test', $senha);
     $admin = $servico->usuario($adminId);
     negado(fn() => $servico->provisionar('Outro', 'outro@example.test', $senha), 'provisionamento funciona apenas uma vez');
@@ -161,6 +163,7 @@ try {
     ]);
     sort($race); ok($race === [false, true], 'somente uma redefinição concorrente consome o token');
     $base = servidor($env); $base2 = servidor($env);
+    require __DIR__ . '/cadastro.php';
     $anon = [];
     foreach (['/', '/index.php', '/historico.php', '/cadastrar.php', '/usuarios.php', '/auditoria.php', '/perfil.php', '/editar_leitura.php?id=1'] as $path) ok(http($base, $path, $anon)['status'] === 303, 'GET protegido ' . $path);
     foreach (['/cadastrar.php', '/excluir_leitura.php', '/usuarios.php', '/perfil.php', '/logout.php'] as $path) ok(http($base, $path, $anon, [])['status'] === 401, 'POST sem autenticação ' . $path);

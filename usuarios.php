@@ -39,6 +39,7 @@ require __DIR__ . '/includes/header.php';
     </form>
 </section>
 <section class="painel lista-usuarios"><h2>Contas cadastradas</h2>
+    <p>Cadastros públicos chegam como Visualizadores desativados. Para aprovar um acesso, abra a conta, selecione <strong>Ativo</strong> e confirme com sua senha de administrador.</p>
     <?php foreach (array_slice($lista, 0, 25) as $u): ?>
         <details class="usuario-item"><summary><strong><?= e($u['nome']) ?></strong> · <?= e(PERFIS[$u['perfil']]) ?> · <?= $u['ativo'] ? 'Ativo' : 'Desativado' ?></summary>
             <p><?= e($u['email']) ?></p><form method="post" action="usuarios.php"><input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>"><input type="hidden" name="acao" value="atualizar"><input type="hidden" name="id" value="<?= e($u['id']) ?>">

@@ -16,6 +16,7 @@ foreach ([
     '/cadastrar.php' => '/api/index.php',
     '/historico.php' => '/api/index.php',
     '/login.php' => '/api/index.php',
+    '/registrar.php' => '/api/index.php',
     '/logout.php' => '/api/index.php',
     '/recuperar_senha.php' => '/api/index.php',
     '/redefinir_senha.php' => '/api/index.php',

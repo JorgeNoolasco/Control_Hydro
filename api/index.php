@@ -11,6 +11,7 @@ $paginas = [
     '/cadastrar.php' => 'cadastrar.php',
     '/historico.php' => 'historico.php',
     '/login.php' => 'login.php',
+    '/registrar.php' => 'registrar.php',
     '/logout.php' => 'logout.php',
     '/recuperar_senha.php' => 'recuperar_senha.php',
     '/redefinir_senha.php' => 'redefinir_senha.php',
@@ -36,7 +37,7 @@ if (!isset($paginas[$caminho])) {
 }
 // Escritas são permitidas somente nos endpoints previstos; as páginas também verificam o método.
 $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$escrita = ['/cadastrar.php', '/login.php', '/recuperar_senha.php', '/redefinir_senha.php', '/perfil.php', '/usuarios.php', '/editar_leitura.php'];
+$escrita = ['/cadastrar.php', '/login.php', '/registrar.php', '/recuperar_senha.php', '/redefinir_senha.php', '/perfil.php', '/usuarios.php', '/editar_leitura.php'];
 $permitidos = in_array($caminho, ['/logout.php', '/excluir_leitura.php'], true) ? ['POST']
     : (in_array($caminho, $escrita, true) ? ['GET', 'HEAD', 'POST'] : ['GET', 'HEAD']);
 if (!in_array($metodo, $permitidos, true)) {

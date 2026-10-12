@@ -25,7 +25,9 @@ require __DIR__ . '/includes/header.php';
 ?>
 <div class="acesso-layout">
     <section class="acesso-historia"><span class="etiqueta">CADERNO DA USINA</span><h2>Cada leitura conta uma parte da história.</h2><p>Acompanhe a água, a energia e os sinais da sua usina em um só lugar.</p><div class="ondas-acesso" aria-hidden="true"></div><p class="nota-acesso">Monitoramento · Histórico · Dados confiáveis</p></section>
-    <section class="painel acesso-formulario" aria-labelledby="entrar-titulo"><h2 id="entrar-titulo">Acesse sua conta</h2><p class="subtitulo">Use o e-mail cadastrado pelo administrador.</p>
+    <section class="painel acesso-formulario" aria-labelledby="entrar-titulo">
+        <?php require __DIR__ . '/includes/acesso_abas.php'; ?>
+        <h2 id="entrar-titulo">Acesse sua conta</h2><p class="subtitulo">Entre com seu e-mail e senha.</p>
         <?php if ($erro): ?><p class="alerta atencao" role="alert"><?= e($erro) ?></p><?php endif; ?>
         <form method="post" action="login.php" class="form-seguranca">
             <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">

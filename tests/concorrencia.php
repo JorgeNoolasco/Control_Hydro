@@ -9,4 +9,6 @@ if (($entrada['acao'] ?? '') === 'login') {
     echo json_encode($auth->login($entrada['email'], 'incorreta', $entrada['ip'])['bloqueado']);
 } elseif (($entrada['acao'] ?? '') === 'redefinir') {
     echo json_encode($auth->redefinir($entrada['token'], $entrada['senha']));
+} elseif (($entrada['acao'] ?? '') === 'registrar') {
+    echo json_encode($auth->registrar($entrada['dados'], $entrada['ip'])['bloqueado']);
 } else exit(1);

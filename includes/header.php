@@ -22,7 +22,7 @@
             <nav aria-label="Navegação principal">
                 <!-- aria-current identifica o link ativo visualmente e para leitores de tela. -->
                 <?php
-                $links = isset($usuario) ? ['index.php' => 'Painel', 'historico.php' => 'Histórico', 'perfil.php' => 'Perfil'] : ['login.php' => 'Entrar'];
+                $links = isset($usuario) ? ['index.php' => 'Painel', 'historico.php' => 'Histórico', 'perfil.php' => 'Perfil'] : ['login.php' => 'Entrar', 'registrar.php' => 'Registrar conta'];
                 if (isset($usuario) && pode($usuario, 'administrar')) $links += ['usuarios.php' => 'Usuários', 'auditoria.php' => 'Auditoria'];
                 foreach ($links as $arquivo => $rotulo): ?>
                     <a href="<?= e($arquivo) ?>" <?= $pagina === $arquivo ? 'aria-current="page"' : '' ?>><?= e($rotulo) ?></a>
