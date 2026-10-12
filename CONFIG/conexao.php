@@ -29,8 +29,10 @@ function configuracaoBanco(): array
     if ($url !== '') {
         // Separa protocolo, host, usuário, senha, banco e parâmetros da URI.
         $partes = parse_url($url);
-        if ($partes === false || !in_array($partes['scheme'] ?? '', ['postgres', 'postgresql'], true)
-            || empty($partes['host']) || empty($partes['user']) || empty($partes['path'])) {
+        if (
+            $partes === false || !in_array($partes['scheme'] ?? '', ['postgres', 'postgresql'], true)
+            || empty($partes['host']) || empty($partes['user']) || empty($partes['path'])
+        ) {
             throw new PDOException('URL PostgreSQL inválida.');
         }
         $driver = 'pgsql';
@@ -58,8 +60,10 @@ function configuracaoBanco(): array
         }
     }
     // Rejeita campos vazios e portas fora do intervalo TCP válido.
-    if ($host === '' || $banco === '' || $usuario === '' || (naVercel() && $senha === '')
-        || !ctype_digit($porta) || (int) $porta < 1 || (int) $porta > 65535) {
+    if (
+        $host === '' || $banco === '' || $usuario === '' || (naVercel() && $senha === '')
+        || !ctype_digit($porta) || (int) $porta < 1 || (int) $porta > 65535
+    ) {
         throw new PDOException('Configuração do banco incompleta.');
     }
     // PDO usa ponto e vírgula como separador do DSN.
@@ -68,8 +72,10 @@ function configuracaoBanco(): array
     }
     // TLS é obrigatório para PostgreSQL na Vercel; require exige criptografia.
     $sslmode = ambiente('DB_SSLMODE', $local['sslmode'] ?? ($parametros['sslmode'] ?? 'require'));
-    if (!is_string($sslmode) || !in_array($sslmode, ['disable', 'require', 'verify-ca', 'verify-full'], true)
-        || ($driver === 'pgsql' && naVercel() && $sslmode === 'disable')) {
+    if (
+        !is_string($sslmode) || !in_array($sslmode, ['disable', 'require', 'verify-ca', 'verify-full'], true)
+        || ($driver === 'pgsql' && naVercel() && $sslmode === 'disable')
+    ) {
         throw new PDOException('Modo SSL do banco inválido.');
     }
     // compact monta o array associativo com as variáveis já validadas.
@@ -107,7 +113,10 @@ function conectar(): PDO
         $ca = ambiente('DB_SSL_CA');
         if ($ca === '') {
             foreach ([ini_get('openssl.cafile'), '/etc/pki/tls/certs/ca-bundle.crt', '/etc/ssl/certs/ca-certificates.crt'] as $arquivo) {
-                if ($arquivo && is_readable($arquivo)) { $ca = $arquivo; break; }
+                if ($arquivo && is_readable($arquivo)) {
+                    $ca = $arquivo;
+                    break;
+                }
             }
         }
         if ($ca === '' || !is_readable($ca)) throw new PDOException('Certificado CA não configurado.');

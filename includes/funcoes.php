@@ -36,9 +36,14 @@ function classeStatus(string $status): string
 /** Reconstrói o objeto de domínio a partir de uma linha retornada pelo PDO. */
 function usinaDaLeitura(array $leitura): Usina
 {
-    return new Usina('Usina SENAI', (float) $leitura['nivel_reservatorio'],
-        (float) $leitura['temperatura'], (float) $leitura['vazao'],
-        (float) $leitura['potencia'], (bool) $leitura['turbina_ligada']);
+    return new Usina(
+        'Usina SENAI',
+        (float) $leitura['nivel_reservatorio'],
+        (float) $leitura['temperatura'],
+        (float) $leitura['vazao'],
+        (float) $leitura['potencia'],
+        (bool) $leitura['turbina_ligada']
+    );
 }
 
 /** Aceita números com sinal opcional, ponto ou vírgula e até duas casas decimais. */
@@ -49,7 +54,7 @@ function lerNumero(array $entrada, string $campo): float
     if (!is_string($valor) || !preg_match('/^-?\d+(?:[.,]\d{1,2})?$/D', trim($valor))) {
         throw new InvalidArgumentException('Preencha todos os números corretamente, com até duas casas decimais.');
     }
-    // Normaliza a vírgula somente depois de validar o conteúdo completo.
+    // Normaliza a vírgula somente depois de validar o conteúdo completoF.
     return (float) str_replace(',', '.', trim($valor));
 }
 
