@@ -1,8 +1,32 @@
 # Publicar HidroControl com autenticação
 
-O código usa PDO PostgreSQL no servidor, sessões compartilhadas no banco e `vercel-php@0.9.0`, runtime comunitário que já constava no projeto. `vercel.json` continua com uma função, Node 22 e região `iad1`. A aplicação não usa o disco da função para manter estado. Não houve publicação remota deste módulo.
+O código usa PDO PostgreSQL no servidor, sessões compartilhadas no banco e `vercel-php@0.9.0`, runtime comunitário que já constava no projeto. `vercel.json` continua com uma função, Node 22 e região `iad1`. A aplicação não usa o disco da função para manter estado. O módulo foi publicado em produção em 12/10/2026.
 
 O registro de publicação de 08/10/2026 correspondia à versão anterior, sem login. Ele não constitui validação da autenticação nova.
+
+## Registro operacional — 12/10/2026
+
+A migração `20261012205627_autenticacao_seguranca` foi aplicada ao projeto Supabase **Hidro-Control** (`ythabdyplpkduqaezkxe`) após autorização para concluir a publicação em produção. O nome do arquivo local foi alinhado à versão registrada pelo serviço; não reaplique essa migração nesse banco.
+
+Verificações após a aplicação:
+
+- As 7 leituras e os 4 sensores foram preservados, com contagens e checksums idênticos aos anteriores.
+- As sete tabelas públicas da aplicação estão com RLS ativo e sem privilégios para `anon` ou `authenticated`.
+- O verificador de segurança do Supabase não retornou avisos.
+- `hidrocontrol_app` recebeu LOGIN e senha aleatória exclusiva, mantendo a ausência de superusuário, BYPASSRLS, CREATEDB e CREATEROLE. `DATABASE_URL` usa esse papel no Transaction pooler com TLS.
+- O primeiro administrador foi provisionado e auditado, com hash de senha aleatória descartada. Um link privado de redefinição, de uso único e validade de 30 minutos, foi entregue em arquivo local excluído do Git e do upload. O titular precisa definir sua senha para entrar.
+
+Publicação concluída pela CLI autenticada no projeto `blue-math/control_hydro` (`prj_KjmJoDCJr7xtA7mpdAUWwNmxNHBo`, equipe `team_4ymdQttXULQ8lG1HjjdRCVik`):
+
+- **Produção:** https://controlhydro.vercel.app
+- **Deployment:** `dpl_cb3mmB5ioDLWbhwZWdy9hwb7CFxz`, estado `READY`, https://controlhydro-5jkijmpbi-blue-math.vercel.app
+- **Código:** checkout `40b72d76ac779d35b9d534da0b71eb93a24da003`, com atualização local da documentação e alinhamento do nome da migração; esses materiais não entram no upload da aplicação.
+- **Variáveis adicionadas somente a Production:** `DATABASE_URL` e `APP_SECRET` como Secret; `APP_URL`, `SESSION_DRIVER` e `DB_SSLMODE` como Config. Valores secretos não foram exibidos nem versionados.
+- **Verificação operacional HTTPS:** login 200; painel/histórico anônimos 303 para login; configuração privada 404; CSS 200. Cookies Secure/HttpOnly/SameSite=Lax, CSP, HSTS e no-store confirmados. A consulta de erros desse deployment não retornou eventos na janela consultada.
+
+O endpoint de login deixou de retornar 503 após a migração, configuração e nova publicação. Não foram feitos testes de escrita nem tentativas automatizadas de login contra produção; a suíte completa usa infraestrutura local descartável.
+
+**Pendente:** envio de recuperação por e-mail. O responsável informou não possuir ainda Resend/domínio verificado. Configure `RESEND_API_KEY` e `MAIL_FROM`, publique novamente e valide o envio real. Até lá, a recuperação pública não entrega e-mails. A definição inicial da senha e a revisão visual em desktop/celular também dependem do titular. O formulário mantém resposta genérica em falhas de envio.
 
 ## 1. Migrações sem apagar leituras
 
@@ -11,7 +35,7 @@ Faça backup e valide primeiro em um banco de homologação separado. Use conex�
 Em um banco que já recebeu as duas migrações existentes, aplique **somente**:
 
 ```text
-supabase/migrations/20261012202249_autenticacao_seguranca.sql
+supabase/migrations/20261012205627_autenticacao_seguranca.sql
 ```
 
 Ela acrescenta `usuarios`, `tentativas_login`, `logs_auditoria`, `tokens_redefinicao_senha`, constraints, índices e o papel restrito `hidrocontrol_app`. Não altera nem apaga leituras ou sensores; preserva a tabela de sessões e reforça a revogação de acesso público.
@@ -30,7 +54,7 @@ Depois de revisar o plano e o destino, execute `supabase db push --skip-vault`. 
 Alternativa com `psql`, solicitando a senha interativamente e executando a migração em uma transação:
 
 ```text
-psql -h HOST_ADMIN -p 5432 -U USUARIO_ADMIN -d postgres -W -v ON_ERROR_STOP=1 --single-transaction -f supabase/migrations/20261012202249_autenticacao_seguranca.sql
+psql -h HOST_ADMIN -p 5432 -U USUARIO_ADMIN -d postgres -W -v ON_ERROR_STOP=1 --single-transaction -f supabase/migrations/20261012205627_autenticacao_seguranca.sql
 ```
 
 Se aplicar manualmente, reconcilie o histórico de migrações na CLI antes de executar `db push` no futuro. Não reaplique as migrações iniciais em tabelas existentes.

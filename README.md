@@ -110,4 +110,4 @@ Reservatório abaixo de 30% ou acima de 90%: atenção. Temperatura entre 70 °C
 
 ## Publicação
 
-Siga [DEPLOY_VERCEL.md](DEPLOY_VERCEL.md). O `vercel.json` foi preservado: a regra existente já encaminha novas páginas ao roteador permitido. Não houve deploy nem migração em produção na implementação deste módulo.
+Publicado em [controlhydro.vercel.app](https://controlhydro.vercel.app). O `vercel.json` foi preservado: a regra existente já encaminha novas páginas ao roteador permitido. Em 12/10/2026, a migração foi aplicada preservando os dados, o administrador foi provisionado e a conexão restrita foi configurada. A recuperação por e-mail depende da configuração de Resend/domínio verificado. Consulte [DEPLOY_VERCEL.md](DEPLOY_VERCEL.md) para o registro operacional, as validações e as instruções de publicação.
