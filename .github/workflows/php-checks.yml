@@ -1,0 +1,30 @@
+name: PHP - qualidade e seguranca
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verificacoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+      - name: Instalar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, curl, openssl, mbstring
+          coverage: none
+      - name: Conferir sintaxe PHP
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+      - name: Testar regras da usina
+        run: php tests/usina.php
+      - name: Testar verificacoes de seguranca sem rede
+        run: php tests/seguranca.php
