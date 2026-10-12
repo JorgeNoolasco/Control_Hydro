@@ -35,7 +35,7 @@ class SessaoBanco implements SessionHandlerInterface, SessionUpdateTimestampHand
         // Cria a linha inicial sem sobrescrever dados de uma sessão já existente.
         $upsert = $this->postgres ? 'ON CONFLICT (id) DO NOTHING' : 'ON DUPLICATE KEY UPDATE id = id';
         $q = $this->pdo->prepare("INSERT INTO sessoes (id, dados, expira_em) VALUES (?, '', ?) $upsert");
-        $q->execute([$id, time() + 7200]);
+        $q->execute([$id, time() + (int) ini_get('session.gc_maxlifetime')]);
         // FOR UPDATE faz outro pedido da mesma sessão aguardar a conclusão deste.
         $q = $this->pdo->prepare('SELECT dados, expira_em FROM sessoes WHERE id = ? FOR UPDATE');
         $q->execute([$id]);
@@ -52,7 +52,7 @@ class SessaoBanco implements SessionHandlerInterface, SessionUpdateTimestampHand
             ? 'ON CONFLICT (id) DO UPDATE SET dados = EXCLUDED.dados, expira_em = EXCLUDED.expira_em'
             : 'ON DUPLICATE KEY UPDATE dados = VALUES(dados), expira_em = VALUES(expira_em)';
         $q = $this->pdo->prepare("INSERT INTO sessoes (id, dados, expira_em) VALUES (?, ?, ?) $upsert");
-        $q->execute([$id, $this->postgres ? base64_encode($data) : $data, time() + 7200]);
+        $q->execute([$id, $this->postgres ? base64_encode($data) : $data, time() + (int) ini_get('session.gc_maxlifetime')]);
         // Confirma também a leitura da usina salva pela página usando este mesmo PDO.
         if ($this->pdo->inTransaction()) $this->pdo->commit();
         return true;

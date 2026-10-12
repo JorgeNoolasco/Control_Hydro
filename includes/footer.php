@@ -8,3 +8,7 @@
 </body>
 
 </html>
+<?php
+// A sessão usa a mesma conexão PDO: confirme antes de liberar o buffer HTML.
+if (session_status() === PHP_SESSION_ACTIVE && !session_write_close()) throw new RuntimeException('Falha de sessão.');
+?>

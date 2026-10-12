@@ -10,6 +10,15 @@ $paginas = [
     '/index.php' => 'index.php',
     '/cadastrar.php' => 'cadastrar.php',
     '/historico.php' => 'historico.php',
+    '/login.php' => 'login.php',
+    '/logout.php' => 'logout.php',
+    '/recuperar_senha.php' => 'recuperar_senha.php',
+    '/redefinir_senha.php' => 'redefinir_senha.php',
+    '/perfil.php' => 'perfil.php',
+    '/usuarios.php' => 'usuarios.php',
+    '/auditoria.php' => 'auditoria.php',
+    '/editar_leitura.php' => 'editar_leitura.php',
+    '/excluir_leitura.php' => 'excluir_leitura.php',
 ];
 
 // Permite testar com: php -S localhost:8000 api/index.php
@@ -27,7 +36,9 @@ if (!isset($paginas[$caminho])) {
 }
 // Somente o cadastro recebe POST; as demais páginas oferecem apenas leitura.
 $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$permitidos = $caminho === '/cadastrar.php' ? ['GET', 'HEAD', 'POST'] : ['GET', 'HEAD'];
+$escrita = ['/cadastrar.php', '/login.php', '/recuperar_senha.php', '/redefinir_senha.php', '/perfil.php', '/usuarios.php', '/editar_leitura.php'];
+$permitidos = in_array($caminho, ['/logout.php', '/excluir_leitura.php'], true) ? ['POST']
+    : (in_array($caminho, $escrita, true) ? ['GET', 'HEAD', 'POST'] : ['GET', 'HEAD']);
 if (!in_array($metodo, $permitidos, true)) {
     // 405 informa método não permitido; Allow lista os métodos aceitos pela rota.
     http_response_code(405);

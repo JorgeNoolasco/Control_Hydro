@@ -7,7 +7,29 @@ date_default_timezone_set('America/Sao_Paulo');
 // __DIR__ mantém os caminhos corretos independentemente da pasta de execução.
 require_once __DIR__ . '/../CONFIG/conexao.php';
 require_once __DIR__ . '/../CLASSES/usina.php';
+require_once __DIR__ . '/seguranca.php';
+// Buffer impede enviar HTML de sucesso antes de confirmar sessão e gravações.
+ob_start();
+ini_set('display_errors', '0');
+set_exception_handler(static function (Throwable $ex): void {
+    $status = $ex instanceof ErroHttp ? $ex->status : 503;
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        try {
+            if ($ex instanceof ErroHttp) session_write_close(); else session_abort();
+        } catch (Throwable $ignorada) { /* A resposta continua genérica. */ }
+    }
+    while (ob_get_level()) ob_end_clean();
+    http_response_code($status);
+    header('Cache-Control: no-store');
+    header('Content-Type: text/html; charset=UTF-8');
+    if (!($ex instanceof ErroHttp)) error_log('HidroControl: operação indisponível.');
+    $mensagem = $ex instanceof ErroHttp ? $ex->getMessage() : erroBanco();
+    echo '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HidroControl</title><h1>HidroControl</h1><p>' . e($mensagem) . '</p><a href="/login.php">Entrar</a></html>';
+});
+cabecalhosSeguranca();
+segredoAplicacao();
 require_once __DIR__ . '/sessao.php';
+require_once __DIR__ . '/auth.php';
 
 /** Escapa texto e atributos HTML para que valores não sejam interpretados como marcação. */
 function e(mixed $valor): string

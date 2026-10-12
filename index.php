@@ -1,6 +1,8 @@
 <?php
 // Painel inicial: consulta as últimas leituras e apresenta indicadores, alertas e gráficos.
 require_once __DIR__ . '/includes/funcoes.php';
+exigirMetodo(['GET', 'HEAD']);
+$usuario = exigirAutenticacao();
 // O cabeçalho compartilhado usa estas variáveis para o título e o link ativo.
 $titulo = 'Visão da usina';
 $descricaoPagina = 'Acompanhe a última leitura e o que precisa de atenção.';
@@ -28,7 +30,7 @@ require __DIR__ . '/includes/header.php';
         <div>
             <h2>A primeira leitura começa aqui.</h2>
             <p>Registre o nível da água, a temperatura e os dados da turbina. Com eles, você poderá acompanhar a usina ao longo do tempo.</p>
-            <a class="botao" href="cadastrar.php">Registrar primeira leitura</a>
+            <?php if (pode($usuario, 'cadastrar')): ?><a class="botao" href="cadastrar.php">Registrar primeira leitura</a><?php endif; ?>
         </div>
     </section>
 <?php else:
@@ -50,7 +52,9 @@ require __DIR__ . '/includes/header.php';
             </div>
             <div class="reservatorio-corpo">
                 <div class="nivel-visual" aria-hidden="true">
-                    <div class="tanque"><div class="agua" style="height: <?= e((float) $ultima['nivel_reservatorio']) ?>%"></div><span class="marca marca-alta"></span><span class="marca marca-baixa"></span></div>
+                    <div class="tanque">
+                        <div class="agua" data-nivel="<?= e((float) $ultima['nivel_reservatorio']) ?>"></div><span class="marca marca-alta"></span><span class="marca marca-baixa"></span>
+                    </div>
                     <div class="regua"><span>100%</span><span>50%</span><span>0%</span></div>
                 </div>
                 <div class="nivel-dados">
@@ -95,24 +99,33 @@ require __DIR__ . '/includes/header.php';
         </div>
     </section>
     <div class="titulo-secao">
-        <div><h2>Evolução das leituras</h2><p class="descricao"><?= count($leituras) === 1 ? 'A primeira leitura já está aqui. As próximas vão formar o histórico.' : 'Compare as últimas ' . count($leituras) . ' leituras, da mais antiga para a mais recente.' ?></p></div>
+        <div>
+            <h2>Evolução das leituras</h2>
+            <p class="descricao"><?= count($leituras) === 1 ? 'A primeira leitura já está aqui. As próximas vão formar o histórico.' : 'Compare as últimas ' . count($leituras) . ' leituras, da mais antiga para a mais recente.' ?></p>
+        </div>
         <a href="historico.php">Ver histórico completo</a>
     </div>
     <div class="secoes">
         <!-- data-campo e data-unidade dizem ao JavaScript qual medição desenhar em cada SVG. -->
         <?php foreach (['temperatura' => ['Temperatura', '°C'], 'nivel_reservatorio' => ['Nível do reservatório', '%']] as $campo => [$rotulo, $unidade]): ?>
             <section class="painel painel-grafico">
-                <div class="titulo-grafico"><h3><?= e($rotulo) ?></h3><span><?= e($unidade) ?></span></div>
+                <div class="titulo-grafico">
+                    <h3><?= e($rotulo) ?></h3><span><?= e($unidade) ?></span>
+                </div>
                 <div class="grafico" data-campo="<?= e($campo) ?>" data-unidade="<?= e($unidade) ?>" role="img" aria-label="<?= e($rotulo) ?> nas últimas leituras. Valores disponíveis no histórico."></div>
-                <noscript><p>Ative o JavaScript para visualizar o gráfico.</p></noscript>
+                <noscript>
+                    <p>Ative o JavaScript para visualizar o gráfico.</p>
+                </noscript>
             </section>
         <?php endforeach; ?>
     </div>
     <!-- JSON inerte: inverte a ordem para os gráficos e escapa caracteres sensíveis ao HTML. -->
-    <script type="application/json" id="dados-graficos"><?= json_encode(array_map(static function ($leitura) {
-        // Mantém o mesmo horário de Brasília apresentado no painel e no histórico.
-        $leitura['data_exibicao'] = dataHora($leitura['data_registro']);
-        return $leitura;
-    }, array_reverse($leituras)), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+    <script type="application/json" id="dados-graficos">
+        <?= json_encode(array_map(static function ($leitura) {
+            // Mantém o mesmo horário de Brasília apresentado no painel e no histórico.
+            $leitura['data_exibicao'] = dataHora($leitura['data_registro']);
+            return $leitura;
+        }, array_reverse($leituras)), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+    </script>
 <?php endif; ?>
 <?php require __DIR__ . '/includes/footer.php'; ?>

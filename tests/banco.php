@@ -5,8 +5,9 @@ declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require_once __DIR__ . '/../CONFIG/conexao.php';
 require_once __DIR__ . '/../CLASSES/SessaoBanco.php';
+require_once __DIR__ . '/local.php';
 
-$pdo = conectar();
+$pdo = pdoTeste(bancoTesteLocal());
 if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') throw new RuntimeException('Este teste requer PostgreSQL.');
 // A leitura é criada dentro de uma transação que será sempre desfeita ao final.
 $pdo->beginTransaction();

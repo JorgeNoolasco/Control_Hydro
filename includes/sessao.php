@@ -4,26 +4,29 @@ declare(strict_types=1);
 
 try {
     // Na Vercel o disco não compartilha sessões; localmente o banco é opcional.
-    if (naVercel() || ambiente('SESSION_DRIVER') === 'database') {
+    if (producao() || ambiente('SESSION_DRIVER', 'database') === 'database') {
         require_once __DIR__ . '/../CLASSES/SessaoBanco.php';
         session_set_save_handler(new SessaoBanco(conectar()), true);
     }
     // Usa um nome próprio para o cookie de sessão deste aplicativo.
     session_name('hidrocontrol');
-    session_start([
+    if (!session_start([
         // Modo estrito rejeita IDs inválidos; o identificador só é aceito por cookie.
         'use_strict_mode' => true,
         'use_only_cookies' => true,
+        'use_trans_sid' => false,
+        'cookie_path' => '/',
+        'cookie_lifetime' => 0,
         // HttpOnly bloqueia leitura por JavaScript; Lax limita envio em navegação entre sites.
         'cookie_httponly' => true,
         'cookie_samesite' => 'Lax',
         // Exige HTTPS na nuvem, mas permite desenvolvimento local em HTTP.
-        'cookie_secure' => naVercel() || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+        'cookie_secure' => producao() || requisicaoHttps(),
         // Validade de duas horas; a limpeza de sessões é sorteada em 1% das inicializações.
-        'gc_maxlifetime' => 7200,
+        'gc_maxlifetime' => tempoInatividade(),
         'gc_probability' => 1,
         'gc_divisor' => 100,
-    ]);
+    ])) throw new RuntimeException('Não foi possível iniciar a sessão.');
     // Evita que caches reutilizem páginas com token CSRF ou mensagem de outra sessão.
     header('Cache-Control: private, no-store');
 } catch (PDOException $ex) {

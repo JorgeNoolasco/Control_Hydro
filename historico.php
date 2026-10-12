@@ -1,6 +1,8 @@
 <?php
 // Histórico paginado com filtros opcionais de situação e data recebidos pela URL.
 require_once __DIR__ . '/includes/funcoes.php';
+exigirMetodo(['GET', 'HEAD']);
+$usuario = exigirAutenticacao();
 $titulo = 'Histórico de leituras';
 $descricaoPagina = 'Volte aos registros anteriores e compare os dados da usina.';
 $pagina = 'historico.php';
@@ -82,7 +84,7 @@ require __DIR__ . '/includes/header.php';
         <div class="vazio vazio-historico">
             <h2><?= $status !== '' || $data !== '' ? 'Nenhuma leitura com esses filtros.' : 'Seu histórico começa com a primeira leitura.' ?></h2>
             <p><?= $status !== '' || $data !== '' ? 'Tente outra data ou consulte todas as situações.' : 'Depois de registrar os dados da usina, você poderá consultá-los aqui.' ?></p>
-            <?php if ($status !== '' || $data !== ''): ?><a href="historico.php">Ver todas as leituras</a><?php else: ?><a class="botao" href="cadastrar.php">Registrar primeira leitura</a><?php endif; ?>
+            <?php if ($status !== '' || $data !== ''): ?><a href="historico.php">Ver todas as leituras</a><?php elseif (pode($usuario, 'cadastrar')): ?><a class="botao" href="cadastrar.php">Registrar primeira leitura</a><?php endif; ?>
         </div>
     <?php else: ?>
         <!-- A região focalizável permite rolar tabelas largas também pelo teclado. -->
@@ -90,17 +92,29 @@ require __DIR__ . '/includes/header.php';
         <div class="tabela" role="region" aria-label="Leituras registradas" tabindex="0">
             <table>
                 <caption><strong><?= $total ?> <?= $total === 1 ? 'leitura encontrada' : 'leituras encontradas' ?></strong><span>Horário de Brasília</span></caption>
-                <thead><tr><th scope="col">Data e hora</th><th scope="col">Nível (%)</th><th scope="col">Temp. (°C)</th><th scope="col">Vazão (m³/s)</th><th scope="col">Potência (MW)</th><th scope="col">Turbina</th><th scope="col">Situação</th></tr></thead>
-                <tbody>
-                <!-- Formata números e datas, escapando os valores textuais antes da saída HTML. -->
-                <?php foreach ($leituras as $leitura): ?>
+                <thead>
                     <tr>
-                        <td><span class="data-leitura"><?= e(substr(dataHora($leitura['data_registro']), 0, 10)) ?></span><span class="hora-leitura"><?= e(substr(dataHora($leitura['data_registro']), 11)) ?></span></td>
-                        <?php foreach (['nivel_reservatorio', 'temperatura', 'vazao', 'potencia'] as $campo): ?><td><?= numero($leitura[$campo]) ?></td><?php endforeach; ?>
-                        <td><?= $leitura['turbina_ligada'] ? 'Ligada' : 'Desligada' ?></td>
-                        <td><span class="status <?= classeStatus($leitura['status_geral']) ?>"><?= e($leitura['status_geral']) ?></span></td>
+                        <th scope="col">Data e hora</th>
+                        <th scope="col">Nível (%)</th>
+                        <th scope="col">Temp. (°C)</th>
+                        <th scope="col">Vazão (m³/s)</th>
+                        <th scope="col">Potência (MW)</th>
+                        <th scope="col">Turbina</th>
+                        <th scope="col">Situação</th>
+                        <?php if (pode($usuario, 'editar')): ?><th scope="col">Ações</th><?php endif; ?>
                     </tr>
-                <?php endforeach; ?>
+                </thead>
+                <tbody>
+                    <!-- Formata números e datas, escapando os valores textuais antes da saída HTML. -->
+                    <?php foreach ($leituras as $leitura): ?>
+                        <tr>
+                            <td><span class="data-leitura"><?= e(substr(dataHora($leitura['data_registro']), 0, 10)) ?></span><span class="hora-leitura"><?= e(substr(dataHora($leitura['data_registro']), 11)) ?></span></td>
+                            <?php foreach (['nivel_reservatorio', 'temperatura', 'vazao', 'potencia'] as $campo): ?><td><?= numero($leitura[$campo]) ?></td><?php endforeach; ?>
+                            <td><?= $leitura['turbina_ligada'] ? 'Ligada' : 'Desligada' ?></td>
+                            <td><span class="status <?= classeStatus($leitura['status_geral']) ?>"><?= e($leitura['status_geral']) ?></span></td>
+                            <?php if (pode($usuario, 'editar')): ?><td><a href="editar_leitura.php?id=<?= e($leitura['id']) ?>">Editar</a></td><?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>

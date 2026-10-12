@@ -1,3 +1,15 @@
+// Aplica a altura sem style inline no HTML, mantendo a CSP restrita a arquivos locais.
+document.querySelectorAll('[data-nivel]').forEach(agua => {
+    const nivel = Number(agua.dataset.nivel);
+    if (Number.isFinite(nivel)) agua.style.height = Math.max(0, Math.min(100, nivel)) + '%';
+});
+// O fragmento nunca chega aos access logs; remove-o também do histórico do navegador.
+const redefinir = document.querySelector('[data-redefinir]');
+if (redefinir && location.hash) {
+    const token = new URLSearchParams(location.hash.slice(1)).get('token');
+    if (token && /^[a-f0-9]{64}$/.test(token)) redefinir.elements.token.value = token;
+    history.replaceState(null, '', location.pathname);
+}
 // Gráficos leves em SVG, sem bibliotecas ou dados inventados.
 // O PHP só inclui este bloco JSON quando existem leituras para o painel.
 const dados = document.getElementById('dados-graficos');
