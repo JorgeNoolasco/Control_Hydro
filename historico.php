@@ -2,6 +2,7 @@
 // Histórico paginado com filtros opcionais de situação e data recebidos pela URL.
 require_once __DIR__ . '/includes/funcoes.php';
 $titulo = 'Histórico de leituras';
+$descricaoPagina = 'Volte aos registros anteriores e compare os dados da usina.';
 $pagina = 'historico.php';
 $erro = null;
 $leituras = [];
@@ -18,7 +19,7 @@ try {
     $parametros = [];
     if ($status !== '') {
         // A lista fechada evita filtros com situações que a aplicação não produz.
-        if (!in_array($status, ['Normal', 'Atenção', 'Crítico'], true)) throw new InvalidArgumentException('Selecione um status válido.');
+        if (!in_array($status, ['Normal', 'Atenção', 'Crítico'], true)) throw new InvalidArgumentException('Selecione uma situação válida.');
         $condicoes[] = 'status_geral = :status';
         $parametros['status'] = $status;
     }
@@ -59,37 +60,42 @@ try {
 }
 require __DIR__ . '/includes/header.php';
 ?>
-<section class="painel">
+<section class="painel painel-historico" aria-label="Consulta de leituras">
     <!-- GET mantém filtros na URL para permitir favoritos e navegação entre páginas. -->
     <form method="get" action="historico.php" class="filtros">
         <label for="status">Situação
             <select id="status" name="status">
-                <option value="">Todas</option>
+                <option value="">Todas as situações</option>
                 <?php foreach (['Normal', 'Atenção', 'Crítico'] as $opcao): ?>
                     <option value="<?= e($opcao) ?>" <?= $status === $opcao ? 'selected' : '' ?>><?= e($opcao) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
         <label for="data">Data da leitura<input type="date" id="data" name="data" value="<?= e($data) ?>" min="1000-01-01" max="9999-12-30"></label>
-        <button class="botao" type="submit">Filtrar</button>
+        <button class="botao" type="submit">Aplicar filtros</button>
         <a href="historico.php">Limpar filtros</a>
     </form>
     <!-- Exibe somente um estado: mensagem de erro, lista vazia ou tabela de resultados. -->
     <?php if ($erro): ?>
         <p class="alerta atencao" role="alert"><?= e($erro) ?></p>
     <?php elseif (!$leituras): ?>
-        <p class="vazio">Nenhuma leitura encontrada.</p>
+        <div class="vazio vazio-historico">
+            <h2><?= $status !== '' || $data !== '' ? 'Nenhuma leitura com esses filtros.' : 'Seu histórico começa com a primeira leitura.' ?></h2>
+            <p><?= $status !== '' || $data !== '' ? 'Tente outra data ou consulte todas as situações.' : 'Depois de registrar os dados da usina, você poderá consultá-los aqui.' ?></p>
+            <?php if ($status !== '' || $data !== ''): ?><a href="historico.php">Ver todas as leituras</a><?php else: ?><a class="botao" href="cadastrar.php">Registrar primeira leitura</a><?php endif; ?>
+        </div>
     <?php else: ?>
         <!-- A região focalizável permite rolar tabelas largas também pelo teclado. -->
+        <p class="dica-tabela">Deslize a tabela para ver todas as colunas.</p>
         <div class="tabela" role="region" aria-label="Leituras registradas" tabindex="0">
             <table>
-                <caption><?= $total ?> leitura(s) encontrada(s) · Horário de Brasília</caption>
+                <caption><strong><?= $total ?> <?= $total === 1 ? 'leitura encontrada' : 'leituras encontradas' ?></strong><span>Horário de Brasília</span></caption>
                 <thead><tr><th scope="col">Data e hora</th><th scope="col">Nível (%)</th><th scope="col">Temp. (°C)</th><th scope="col">Vazão (m³/s)</th><th scope="col">Potência (MW)</th><th scope="col">Turbina</th><th scope="col">Situação</th></tr></thead>
                 <tbody>
                 <!-- Formata números e datas, escapando os valores textuais antes da saída HTML. -->
                 <?php foreach ($leituras as $leitura): ?>
                     <tr>
-                        <td><?= e(dataHora($leitura['data_registro'])) ?></td>
+                        <td><span class="data-leitura"><?= e(substr(dataHora($leitura['data_registro']), 0, 10)) ?></span><span class="hora-leitura"><?= e(substr(dataHora($leitura['data_registro']), 11)) ?></span></td>
                         <?php foreach (['nivel_reservatorio', 'temperatura', 'vazao', 'potencia'] as $campo): ?><td><?= numero($leitura[$campo]) ?></td><?php endforeach; ?>
                         <td><?= $leitura['turbina_ligada'] ? 'Ligada' : 'Desligada' ?></td>
                         <td><span class="status <?= classeStatus($leitura['status_geral']) ?>"><?= e($leitura['status_geral']) ?></span></td>

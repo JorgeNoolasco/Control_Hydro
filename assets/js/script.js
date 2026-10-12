@@ -15,46 +15,62 @@ if (dados) {
     }
     // Cada contêiner informa a coluna e a unidade usando atributos data-* do HTML.
     document.querySelectorAll('.grafico').forEach(container => {
-        // Colunas decimais do PDO podem chegar como texto; Number permite fazer os cálculos.
-        const valores = leituras.map(leitura => Number(leitura[container.dataset.campo]));
-        const nivel = container.dataset.campo === 'nivel_reservatorio';
-        // Nível usa escala fixa de 0 a 100; temperatura ganha uma margem de cinco graus.
-        const minimo = nivel ? 0 : Math.floor(Math.min(...valores) - 5);
-        const maximo = nivel ? 100 : Math.ceil(Math.max(...valores) + 5);
-        // viewBox mantém as proporções; a descrição acessível já está no contêiner.
-        const svg = elemento('svg', { viewBox: '0 0 480 230', 'aria-hidden': 'true' });
-        // Desenha cinco linhas horizontais e os valores do eixo vertical.
-        for (let i = 0; i <= 4; i++) {
-            const y = 20 + i * 40;
-            svg.append(elemento('line', { x1: 65, y1: y, x2: 460, y2: y }));
-            svg.append(elemento('text', { x: 55, y: y + 4, 'text-anchor': 'end' },
-                (maximo - i * (maximo - minimo) / 4).toLocaleString('pt-BR', { maximumFractionDigits: 1 })));
+        // Redesenha apenas quando a largura muda; os rótulos não encolhem no celular.
+        let larguraAnterior = 0;
+        function desenhar() {
+            const largura = Math.round(container.getBoundingClientRect().width);
+            if (!largura || largura === larguraAnterior) return;
+            larguraAnterior = largura;
+            const esquerda = 52;
+            const direita = largura - 16;
+            // Colunas decimais do PDO podem chegar como texto; Number permite fazer os cálculos.
+            const valores = leituras.map(leitura => Number(leitura[container.dataset.campo]));
+            const nivel = container.dataset.campo === 'nivel_reservatorio';
+            // Nível usa escala fixa de 0 a 100; temperatura ganha uma margem de cinco graus.
+            const minimo = nivel ? 0 : Math.floor(Math.min(...valores) - 5);
+            const maximo = nivel ? 100 : Math.ceil(Math.max(...valores) + 5);
+            // viewBox mantém as proporções; a descrição acessível já está no contêiner.
+            const svg = elemento('svg', { viewBox: `0 0 ${largura} 244`, 'aria-hidden': 'true' });
+            // Desenha cinco linhas horizontais e os valores do eixo vertical.
+            for (let i = 0; i <= 4; i++) {
+                const y = 20 + i * 40;
+                svg.append(elemento('line', { x1: esquerda, y1: y, x2: direita, y2: y }));
+                svg.append(elemento('text', { x: esquerda - 10, y: y + 4, 'text-anchor': 'end' },
+                    (maximo - i * (maximo - minimo) / 4).toLocaleString('pt-BR', { maximumFractionDigits: 1 })));
+            }
+            // Converte medições em coordenadas; no SVG o eixo Y cresce de cima para baixo.
+            // Uma única leitura fica centralizada, evitando dividir por zero no eixo X.
+            const pontos = valores.map((valor, i) => ({
+                x: valores.length === 1 ? (esquerda + direita) / 2 : esquerda + i * (direita - esquerda) / (valores.length - 1),
+                y: 180 - (valor - minimo) / (maximo - minimo) * 160
+            }));
+            // A polyline conecta as leituras e os círculos destacam cada amostra.
+            svg.append(elemento('polyline', { points: pontos.map(p => p.x + ',' + p.y).join(' ') }));
+            pontos.forEach((p, i) => {
+                const ponto = elemento('circle', { cx: p.x, cy: p.y, r: 4 });
+                // title mostra uma dica ao passar o mouse, com a data recebida e o valor exato.
+                ponto.append(elemento('title', {}, leituras[i].data_exibicao + ': ' +
+                    valores[i].toLocaleString('pt-BR') + ' ' + container.dataset.unidade));
+                svg.append(ponto);
+            });
+            // Separa data e hora em duas linhas, legíveis mesmo nos menores gráficos.
+            const rotulo = (leitura, x, alinhamento) => {
+                const [data, hora] = leitura.data_exibicao.split(' ');
+                svg.append(elemento('text', { x, y: 211, 'text-anchor': alinhamento }, data.slice(0, 5)));
+                svg.append(elemento('text', { x, y: 229, 'text-anchor': alinhamento }, hora.slice(0, 5)));
+            };
+            // Uma leitura recebe um único rótulo central, sem repetir o mesmo horário.
+            if (leituras.length === 1) {
+                rotulo(leituras[0], pontos[0].x, 'middle');
+            } else {
+                rotulo(leituras[0], esquerda, 'start');
+                rotulo(leituras[leituras.length - 1], direita, 'end');
+            }
+            // Adiciona o gráfico completo ao DOM de uma só vez.
+            container.replaceChildren(svg);
         }
-        // Converte medições em coordenadas; no SVG o eixo Y cresce de cima para baixo.
-        // Uma única leitura fica centralizada, evitando dividir por zero no eixo X.
-        const pontos = valores.map((valor, i) => ({
-            x: valores.length === 1 ? 262 : 65 + i * 395 / (valores.length - 1),
-            y: 180 - (valor - minimo) / (maximo - minimo) * 160
-        }));
-        // A polyline conecta as leituras e os círculos destacam cada amostra.
-        svg.append(elemento('polyline', { points: pontos.map(p => p.x + ',' + p.y).join(' ') }));
-        pontos.forEach((p, i) => {
-            const ponto = elemento('circle', { cx: p.x, cy: p.y, r: 4 });
-            // title mostra uma dica ao passar o mouse, com a data recebida e o valor exato.
-            ponto.append(elemento('title', {}, leituras[i].data_registro + ': ' +
-                valores[i].toLocaleString('pt-BR') + ' ' + container.dataset.unidade));
-            svg.append(ponto);
-        });
-        // Extrai dia/mês e hora/minuto do texto de data do banco, sem converter o fuso aqui.
-        const rotulo = leitura => {
-            const [data, hora] = leitura.data_registro.split(' ');
-            return data.slice(8, 10) + '/' + data.slice(5, 7) + ' ' + hora.slice(0, 5);
-        };
-        // Rotula somente as extremidades para não sobrepor datas em telas estreitas.
-        svg.append(elemento('text', { x: 65, y: 212 }, rotulo(leituras[0])));
-        svg.append(elemento('text', { x: 460, y: 212, 'text-anchor': 'end' }, rotulo(leituras[leituras.length - 1])));
-        // Adiciona o gráfico completo ao DOM de uma só vez.
-        container.append(svg);
+        desenhar();
+        new ResizeObserver(desenhar).observe(container);
     });
 }
 

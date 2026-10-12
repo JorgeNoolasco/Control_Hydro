@@ -13,7 +13,9 @@
     <script src="assets/js/script.js" defer></script>
 </head>
 <body>
-<header>
+<a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+<header class="cabecalho">
+    <div class="cabecalho-conteudo">
     <a class="logo" href="index.php" aria-label="HidroControl — página inicial"><?php readfile(__DIR__ . '/../assets/logo.svg'); ?></a>
     <nav aria-label="Navegação principal">
         <!-- aria-current identifica o link ativo visualmente e para leitores de tela. -->
@@ -21,13 +23,17 @@
             <a href="<?= e($arquivo) ?>" <?= $pagina === $arquivo ? 'aria-current="page"' : '' ?>><?= e($rotulo) ?></a>
         <?php endforeach; ?>
     </nav>
-    <span class="ambiente">Usina </span>
+    <span class="ambiente">Leituras manuais</span>
+    </div>
 </header>
-<main>
+<main id="conteudo" tabindex="-1">
     <div class="topo">
         <!-- O atalho para cadastro aparece nas páginas que não são o próprio formulário. -->
-        <div><p class="sobretitulo">MONITORAMENTO HIDRELÉTRICO</p><h1><?= e($titulo) ?></h1></div>
-        <?php if ($pagina !== 'cadastrar.php'): ?><a class="botao" href="cadastrar.php">+ Registrar nova leitura</a><?php endif; ?>
+        <div>
+            <h1><?= e($titulo) ?></h1>
+            <p class="introducao"><?= e($descricaoPagina ?? '') ?></p>
+        </div>
+        <?php if ($pagina !== 'cadastrar.php'): ?><a class="botao" href="cadastrar.php"><span aria-hidden="true" class="mais">+</span> Registrar leitura</a><?php endif; ?>
     </div>
     <!-- Mensagem temporária: é consumida nesta renderização e não reaparece ao atualizar. -->
     <?php if (!empty($_SESSION['sucesso'])): ?>
