@@ -47,7 +47,7 @@ require __DIR__ . '/includes/header.php';
             <label for="nome">Nome<input id="nome" name="nome" autocomplete="name" minlength="2" maxlength="120" required value="<?= e($nome) ?>"></label>
             <label for="email">E-mail<input id="email" name="email" type="email" autocomplete="email" maxlength="254" required value="<?= e($email) ?>"></label>
             <label for="senha">Senha<input id="senha" name="senha" type="password" autocomplete="new-password" minlength="12" maxlength="72" required aria-describedby="senha-ajuda"></label>
-            <p id="senha-ajuda" class="ajuda-campo">Use de 12 a 72 bytes. Prefira uma frase longa; caracteres acentuados podem ocupar mais de um byte.</p>
+            <p id="senha-ajuda" class="ajuda-campo">Use pelo menos 12 caracteres. Prefira uma frase longa, difícil de adivinhar e que você não utilize em outros sites.</p>
             <label for="confirmacao">Confirme a senha<input id="confirmacao" name="confirmacao" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></label>
             <button type="submit" class="botao">Registrar conta</button>
         </form>
