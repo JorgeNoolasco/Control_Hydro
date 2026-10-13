@@ -85,7 +85,8 @@ require __DIR__ . '/includes/header.php';
             <div class="acoes"><button type="submit" class="botao">Salvar leitura</button><a href="index.php">Cancelar</a></div>
         </form>
         <?php if ($edicao && pode($usuario, 'excluir')): ?>
-            <details class="area-exclusao"><summary>Excluir esta leitura</summary>
+            <details class="area-exclusao">
+                <summary>Excluir esta leitura</summary>
                 <p>Esta ação remove a leitura do histórico. A exclusão ficará registrada na auditoria.</p>
                 <form method="post" action="excluir_leitura.php">
                     <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">

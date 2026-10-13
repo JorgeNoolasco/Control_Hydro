@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 function idLeitura(mixed $valor): int
@@ -11,8 +12,14 @@ function idLeitura(mixed $valor): int
 function salvarLeitura(array $usuario, array $entrada, ?int $id = null): int
 {
     if (!in_array($entrada['turbina_ligada'] ?? null, ['0', '1'], true)) throw new InvalidArgumentException('Selecione o estado da turbina.');
-    $usina = new Usina('Usina SENAI', lerNumero($entrada, 'nivel_reservatorio'), lerNumero($entrada, 'temperatura'),
-        lerNumero($entrada, 'vazao'), lerNumero($entrada, 'potencia'), $entrada['turbina_ligada'] === '1');
+    $usina = new Usina(
+        'Usina SENAI',
+        lerNumero($entrada, 'nivel_reservatorio'),
+        lerNumero($entrada, 'temperatura'),
+        lerNumero($entrada, 'vazao'),
+        lerNumero($entrada, 'potencia'),
+        $entrada['turbina_ligada'] === '1'
+    );
     $dados = $usina->obterDados();
     unset($dados['nome']);
     return transacao(conectar(), function () use ($usuario, $dados, $id) {

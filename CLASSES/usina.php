@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /** Representa uma leitura da usina e calcula alertas didáticos, sem acessar o banco. */

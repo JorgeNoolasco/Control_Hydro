@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -18,7 +19,10 @@ class SessaoBanco implements SessionHandlerInterface, SessionUpdateTimestampHand
     }
 
     /** Não precisa abrir arquivos: a conexão já foi recebida no construtor. */
-    public function open(string $path, string $name): bool { return true; }
+    public function open(string $path, string $name): bool
+    {
+        return true;
+    }
 
     /** Desfaz uma transação que tenha ficado aberta e libera os bloqueios da sessão. */
     public function close(): bool

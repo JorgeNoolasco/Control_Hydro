@@ -15,8 +15,10 @@ set_exception_handler(static function (Throwable $ex): void {
     $status = $ex instanceof ErroHttp ? $ex->status : 503;
     if (session_status() === PHP_SESSION_ACTIVE) {
         try {
-            if ($ex instanceof ErroHttp) session_write_close(); else session_abort();
-        } catch (Throwable $ignorada) { /* A resposta continua genérica. */ }
+            if ($ex instanceof ErroHttp) session_write_close();
+            else session_abort();
+        } catch (Throwable $ignorada) { /* A resposta continua genérica. */
+        }
     }
     while (ob_get_level()) ob_end_clean();
     http_response_code($status);

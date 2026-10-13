@@ -4,7 +4,10 @@ exigirMetodo(['GET', 'HEAD', 'POST']);
 if (usuarioAtual()) redirecionar('index.php');
 $titulo = 'Faça parte do HidroControl';
 $descricaoPagina = 'Crie sua conta para acompanhar o monitoramento da usina.';
-$pagina = 'registrar.php'; $erro = null; $nome = ''; $email = '';
+$pagina = 'registrar.php';
+$erro = null;
+$nome = '';
+$email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validarCsrf($_POST['csrf'] ?? null);
     try {
@@ -21,16 +24,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirecionar('login.php');
         }
     } catch (InvalidArgumentException $ex) {
-        http_response_code(422); $erro = $ex->getMessage();
+        http_response_code(422);
+        $erro = $ex->getMessage();
     }
 }
 require __DIR__ . '/includes/header.php';
 ?>
 <div class="acesso-layout">
-    <section class="acesso-historia"><span class="etiqueta">CADERNO DA USINA</span><h2>Um novo olhar sobre cada leitura.</h2><p>Acompanhe o reservatório, a geração de energia e o histórico da usina.</p><div class="ondas-acesso" aria-hidden="true"></div><p class="nota-acesso">Sua conta começa como Visualizador, com acesso a consultas após aprovação do administrador.</p></section>
+    <section class="acesso-historia"><span class="etiqueta">CADERNO DA USINA</span>
+        <h2>Um novo olhar sobre cada leitura.</h2>
+        <p>Acompanhe o reservatório, a geração de energia e o histórico da usina.</p>
+        <div class="ondas-acesso" aria-hidden="true"></div>
+        <p class="nota-acesso">Sua conta começa como Visualizador, com acesso a consultas após aprovação do administrador.</p>
+    </section>
     <section class="painel acesso-formulario" aria-labelledby="registrar-titulo">
         <?php require __DIR__ . '/includes/acesso_abas.php'; ?>
-        <h2 id="registrar-titulo">Crie sua conta</h2><p class="subtitulo">Preencha seus dados e solicite acesso ao HidroControl.</p>
+        <h2 id="registrar-titulo">Crie sua conta</h2>
+        <p class="subtitulo">Preencha seus dados e solicite acesso ao HidroControl.</p>
         <?php if ($erro): ?><p class="alerta atencao" role="alert"><?= e($erro) ?></p><?php endif; ?>
         <form method="post" action="registrar.php" class="form-seguranca">
             <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">

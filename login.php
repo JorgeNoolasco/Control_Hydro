@@ -4,7 +4,9 @@ exigirMetodo(['GET', 'HEAD', 'POST']);
 if (usuarioAtual()) redirecionar('index.php');
 $titulo = 'Bem-vindo ao HidroControl';
 $descricaoPagina = 'Entre para acompanhar a usina com segurança.';
-$pagina = 'login.php'; $erro = null; $email = '';
+$pagina = 'login.php';
+$erro = null;
+$email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validarCsrf($_POST['csrf'] ?? null);
     try {
@@ -18,16 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code($resultado['bloqueado'] ? 429 : 401);
         $erro = $resultado['bloqueado'] ? 'Não foi possível entrar. Aguarde 15 minutos e tente novamente.' : 'E-mail ou senha inválidos.';
     } catch (InvalidArgumentException $ex) {
-        http_response_code(401); $erro = 'E-mail ou senha inválidos.';
+        http_response_code(401);
+        $erro = 'E-mail ou senha inválidos.';
     }
 }
 require __DIR__ . '/includes/header.php';
 ?>
 <div class="acesso-layout">
-    <section class="acesso-historia"><span class="etiqueta">CADERNO DA USINA</span><h2>Cada leitura conta uma parte da história.</h2><p>Acompanhe a água, a energia e os sinais da sua usina em um só lugar.</p><div class="ondas-acesso" aria-hidden="true"></div><p class="nota-acesso">Monitoramento · Histórico · Dados confiáveis</p></section>
+    <section class="acesso-historia"><span class="etiqueta">CADERNO DA USINA</span>
+        <h2>Cada leitura conta uma parte da história.</h2>
+        <p>Acompanhe a água, a energia e os sinais da sua usina em um só lugar.</p>
+        <div class="ondas-acesso" aria-hidden="true"></div>
+        <p class="nota-acesso">Monitoramento · Histórico · Dados confiáveis</p>
+    </section>
     <section class="painel acesso-formulario" aria-labelledby="entrar-titulo">
         <?php require __DIR__ . '/includes/acesso_abas.php'; ?>
-        <h2 id="entrar-titulo">Acesse sua conta</h2><p class="subtitulo">Entre com seu e-mail e senha.</p>
+        <h2 id="entrar-titulo">Acesse sua conta</h2>
+        <p class="subtitulo">Entre com seu e-mail e senha.</p>
         <?php if ($erro): ?><p class="alerta atencao" role="alert"><?= e($erro) ?></p><?php endif; ?>
         <form method="post" action="login.php" class="form-seguranca">
             <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">

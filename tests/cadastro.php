@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types=1);
 // Incluído pela integração: reutiliza apenas seu banco e seus servidores loopback.
-if (PHP_SAPI !== 'cli' || !isset($base, $base2, $pdo, $servico, $envWorker)) { exit(1); }
+if (PHP_SAPI !== 'cli' || !isset($base, $base2, $pdo, $servico, $envWorker)) {
+    exit(1);
+}
 
-function cadastrarContaTeste(string $base, array $dados, array &$cookies): array {
+function cadastrarContaTeste(string $base, array $dados, array &$cookies): array
+{
     $formulario = http($base, '/registrar.php', $cookies);
     return http($base, '/registrar.php', $cookies, ['csrf' => tokenForm($formulario)] + $dados);
 }
@@ -53,7 +57,9 @@ $pdo->exec('REVOKE INSERT ON logs_auditoria FROM hidrocontrol_app');
 try {
     ok(cadastrarContaTeste($base, $cadFalha, $cadCookies)['status'] === 503, 'falha de auditoria impede cadastro público');
     ok((int) $pdo->query("SELECT count(*) FROM usuarios WHERE email='atomicidade@example.test'")->fetchColumn() === 0, 'cadastro revertido quando auditoria falha');
-} finally { $pdo->exec('GRANT INSERT ON logs_auditoria TO hidrocontrol_app'); }
+} finally {
+    $pdo->exec('GRANT INSERT ON logs_auditoria TO hidrocontrol_app');
+}
 
 $cadAdminCookies = [];
 entrar($base, 'admin@example.test', $senha, $cadAdminCookies);
@@ -66,7 +72,8 @@ ok(entrar($base2, $cadDados['email'], $senha, $cadCookies)['status'] === 303 && 
 ok(http($base, '/cadastrar.php', $cadCookies)['status'] === 403 && http($base, '/usuarios.php', $cadCookies)['status'] === 403, 'conta aprovada mantém restrições de visualizador');
 
 $cadRaceDados = ['email' => 'race-cadastro@example.test'] + $cadDados;
-$servico->registrar($cadRaceDados, '127.0.0.70'); $servico->registrar($cadRaceDados, '127.0.0.71');
+$servico->registrar($cadRaceDados, '127.0.0.70');
+$servico->registrar($cadRaceDados, '127.0.0.71');
 $cadRace = concorrentes($envWorker, [
     ['acao' => 'registrar', 'dados' => $cadRaceDados, 'ip' => '127.0.0.72'],
     ['acao' => 'registrar', 'dados' => $cadRaceDados, 'ip' => '127.0.0.73'],
