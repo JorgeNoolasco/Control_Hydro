@@ -2,7 +2,10 @@
 // Teste de integração: exige uma conexão PostgreSQL configurada e tabelas já criadas.
 declare(strict_types=1);
 // A execução é exclusiva do terminal, pois o teste realiza escritas temporárias no banco.
-if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
 require_once __DIR__ . '/../CONFIG/conexao.php';
 require_once __DIR__ . '/../CLASSES/SessaoBanco.php';
 require_once __DIR__ . '/local.php';

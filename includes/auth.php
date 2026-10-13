@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 require_once __DIR__ . '/../CLASSES/Autenticacao.php';
 
@@ -13,16 +14,25 @@ function invalidarSessao(): void
     $_SESSION = [];
     if (session_status() === PHP_SESSION_ACTIVE && !session_destroy()) throw new RuntimeException('Falha ao invalidar sessão.');
     $params = session_get_cookie_params();
-    setcookie(session_name(), '', ['expires' => time() - 3600, 'path' => $params['path'],
-        'secure' => $params['secure'], 'httponly' => true, 'samesite' => 'Lax']);
+    setcookie(session_name(), '', [
+        'expires' => time() - 3600,
+        'path' => $params['path'],
+        'secure' => $params['secure'],
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
 }
 
 function iniciarAutenticacao(array $usuario): void
 {
     // Remove o ID anterior do banco. Nenhum dado de perfil é aceito do navegador.
     if (!session_regenerate_id(true)) throw new RuntimeException('Falha ao renovar sessão.');
-    $_SESSION = ['auth' => ['id' => $usuario['id'], 'versao_sessao' => (int) $usuario['versao_sessao'],
-        'inicio' => time(), 'atividade' => time()], 'csrf' => bin2hex(random_bytes(32))];
+    $_SESSION = ['auth' => [
+        'id' => $usuario['id'],
+        'versao_sessao' => (int) $usuario['versao_sessao'],
+        'inicio' => time(),
+        'atividade' => time()
+    ], 'csrf' => bin2hex(random_bytes(32))];
 }
 
 function usuarioAtual(): ?array

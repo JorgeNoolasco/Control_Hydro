@@ -29,7 +29,7 @@ foreach ($casos as [$nome, $nivel, $temperatura, $turbina, $esperado, $alertas])
     echo "OK: $nome\n";
 }
 // Exercita limites, sinais inválidos, NaN, infinito e excesso de casas decimais.
-foreach ([[-1,65,1,1], [101,65,1,1], [70,65,-1,1], [70,65,1,-1], [70,1000,1,1], [NAN,65,1,1], [70,65,INF,1], [70.001,65,1,1]] as $valores) {
+foreach ([[-1, 65, 1, 1], [101, 65, 1, 1], [70, 65, -1, 1], [70, 65, 1, -1], [70, 1000, 1, 1], [NAN, 65, 1, 1], [70, 65, INF, 1], [70.001, 65, 1, 1]] as $valores) {
     try {
         new Usina('Teste', $valores[0], $valores[1], $valores[2], $valores[3], true);
         fwrite(STDERR, "Falha: entrada inválida aceita.\n");
